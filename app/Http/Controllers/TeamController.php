@@ -92,7 +92,18 @@ class TeamController extends Controller
         $mentor = User::where(['id' => $request->mentorId, 'role_id' => $mentorId])->first();
         if (!$mentor) return ErrorResponse('Mentor With Id: ' . $request->mentorId . ' Does Not Exist');
 
+        $uniqueId = false;
+
+        while (!$uniqueId) {
+            $teamId = generateRandom();
+
+            $checkTeam = Cohort::where(['cohort_id' => $teamId])->count();
+
+            if ($checkTeam === 0) $uniqueId = true;
+        }
+
         $team = new Team([
+            'team_id' => $teamId,
             'team_name' => $request->team_name,
             'team_description' => $request->team_description,
             'team_members' => json_encode($request->studentIds),
