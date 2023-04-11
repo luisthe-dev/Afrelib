@@ -14,7 +14,14 @@ class TeamController extends Controller
 
     public function getAllTeams()
     {
-        return Team::where(['is_deleted' => false])->paginate(25);
+        $teams = Team::where(['is_deleted' => false])->paginate(25);
+
+        foreach ($teams as $team) {
+            $team_members = json_decode($team->team_members, true);
+            $team->students = sizeof($team_members);
+        }
+
+        return $teams;
     }
 
     public function getSingleTeam($teamId)
