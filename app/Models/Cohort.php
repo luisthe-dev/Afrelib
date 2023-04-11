@@ -26,5 +26,6 @@ class Cohort extends Model
         'cohort_teams',
         'cohort_mentors',
         'cohort_panelists',
+        'is_deleted'
     ];
 }
