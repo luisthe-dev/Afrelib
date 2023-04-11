@@ -16,8 +16,14 @@ class TeamController extends Controller
     {
         $teams = Team::where(['is_deleted' => false])->paginate(25);
 
+        $mentorId = DB::table('roles')->where(['role_name' => 'Mentor'])->first()->role_id;
+
         foreach ($teams as $team) {
             $team_members = json_decode($team->team_members, true);
+
+            $mentor = User::where(['id' => $team->team_mentor, 'role_id' => $mentorId])->first();
+            $team->mentor = $mentor;
+
             $team->students = sizeof($team_members);
         }
 

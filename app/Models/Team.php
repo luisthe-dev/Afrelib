@@ -20,6 +20,7 @@ class Team extends Model
 
     protected $hidden = [
         'team_members',
-        'team_mentor'
+        'team_mentor',
+        'is_deleted'
     ];
 }
