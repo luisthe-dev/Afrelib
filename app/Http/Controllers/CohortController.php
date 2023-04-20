@@ -47,14 +47,31 @@ class CohortController extends Controller
     {
         $cohort = Cohort::where(['is_deleted' => false, 'cohort_id' => $cohortId])->first();
 
+        $studentId = DB::table('roles')->where(['role_name' => 'Student'])->first()->role_id;
+        $panelistId = DB::table('roles')->where(['role_name' => 'Panelist'])->first()->role_id;
+        $mentorId = DB::table('roles')->where(['role_name' => 'Mentor'])->first()->role_id;
+
+        $mentors = array('data' => array(), 'count' => 0);
+        $panelists = array('data' => array(), 'count' => 0);
+        $teams = array('data' => array(), 'count' => 0);
+        $students = array('data' => array(), 'count' => 0);
+
         $cohort_mentors = json_decode($cohort->cohort_mentors, true);
-        $cohort->mentors = sizeof($cohort_mentors);
+        foreach ($cohort_mentors as $mentor) {
+            $single = User::where(['id' => $mentor, 'role_id' => $mentorId])->first();
+            if (!$single) continue;
+            array_push($mentors['data'], $single);
+        }
 
         $cohort_panelists = json_decode($cohort->cohort_panelists, true);
         $cohort->panelists = sizeof($cohort_panelists);
+        foreach ($cohort_panelists as $panelist) {
+            $single = User::where(['id' => $panelist, 'role_id' => $panelistId])->first();
+            if (!$single) continue;
+            array_push($panelists['data'], $single);
+        }
 
         $cohort_teams = json_decode($cohort->cohort_teams, true);
-        $cohort->teams = sizeof($cohort_teams);
 
         $cohort_students = 0;
         foreach ($cohort_teams as $cohort_team) {
@@ -63,10 +80,23 @@ class CohortController extends Controller
             if (!$team) continue;
 
             $team_students = json_decode($team->team_members, true);
-
+            foreach ($team_students as $student) {
+                $single = User::where(['id' => $student, 'role_id' => $studentId])->first();
+                if (!$single) continue;
+                array_push($students['data'], $single);
+            }
+            array_push($team['data'], $team);
             $cohort_students = $cohort_students + sizeof($team_students);
         }
-        $cohort->students = $cohort_students;
+
+        $mentors['count'] = sizeof($cohort_mentors);
+        $panelists['count'] = sizeof($cohort_panelists);
+        $teams['count'] = sizeof($cohort_teams);
+        $students['count'] = sizeof($cohort_students);
+
+        $cohort->mentors = $mentors;
+        $cohort->panelists = $panelists;
+        $cohort->teams = $teams;
 
 
         return SuccessResponse('Cohort Details Fetched Successfully', $cohort);
