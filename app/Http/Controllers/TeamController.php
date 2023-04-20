@@ -83,7 +83,7 @@ class TeamController extends Controller
         return SuccessResponse('Cohort Teams Fetxhed Succssfully', $cohort);
     }
 
-    public function createTeam(CreateTeamRequest $request, $cohortId)
+    public function createTeam(CreateTeamRequest $request, $cohortId = null)
     {
 
         $students = $request->studentIds;
@@ -92,9 +92,10 @@ class TeamController extends Controller
         $studentId = DB::table('roles')->where(['role_name' => 'Student'])->first()->role_id;
         $mentorId = DB::table('roles')->where(['role_name' => 'Mentor'])->first()->role_id;
 
-        $cohort = Cohort::where(['cohort_id' => $cohortId, 'is_deleted' => false])->first();
-
-        if (!$cohort) return ErrorResponse('Cohort With Id: ' . $cohortId . ' Does Not Exist');
+        if ($cohortId) {
+            $cohort = Cohort::where(['cohort_id' => $cohortId, 'is_deleted' => false])->first();
+            if (!$cohort) return ErrorResponse('Cohort With Id: ' . $cohortId . ' Does Not Exist');
+        }
 
         foreach ($students as $student) {
             $single = User::where(['id' => $student, 'role_id' => $studentId])->first();
@@ -125,16 +126,18 @@ class TeamController extends Controller
 
         $team->save();
 
-        $cohortTeams = json_decode($cohort->cohort_teams, true);
-        array_push($cohortTeams, $team->id);
+        if ($cohortId) {
+            $cohortTeams = json_decode($cohort->cohort_teams, true);
+            array_push($cohortTeams, $team->team_id);
 
-        $cohortMentors = json_decode($cohort->cohort_mentors, true);
-        if (!in_array($request->mentorId, $cohortMentors)) array_push($cohortMentors, $request->mentorId);
+            $cohortMentors = json_decode($cohort->cohort_mentors, true);
+            if (!in_array($request->mentorId, $cohortMentors)) array_push($cohortMentors, $request->mentorId);
 
-        $cohort->cohort_teams = json_encode($cohortTeams);
-        $cohort->cohort_mentors = json_encode($cohortMentors);
+            $cohort->cohort_teams = json_encode($cohortTeams);
+            $cohort->cohort_mentors = json_encode($cohortMentors);
 
-        $cohort->save();
+            $cohort->save();
+        }
 
         $team->students = $studentData;
         $team->mentor = $mentor;
@@ -162,6 +165,34 @@ class TeamController extends Controller
         $team->mentor = $mentor;
 
         return SuccessResponse('Team Mentor Updated Successfully', $team);
+    }
+
+    public function addTeamToCohort($cohortId, $team_id)
+    {
+        $cohort = Cohort::where(['cohort_id' => $cohortId])->first();
+
+        if (!$cohort) return ErrorResponse('Cohort Does Not Exist');
+
+        $team = Team::where(['id' => $team_id, 'is_deleted' => false])->first();
+
+        if (!$team) return ErrorResponse('Team Does Not Exist');
+
+        $teamExist = Cohort::where([['cohort_teams', 'like', '%,' . $team_id . ',%']])->get();
+
+        foreach ($teamExist as $single) {
+            $singleTeams = json_decode($single->cohort_teams, true);
+
+            foreach ($singleTeams as $team) {
+                if ($team->id == $team_id) return ErrorResponse('Team Already Belongs To A Cohort');
+            }
+        }
+
+        $cohortTeams = json_decode($cohort->cohort_teams, true);
+        array_push($cohortTeams, $team_id);
+        $cohort->cohort_teams = json_encode($cohortTeams);
+        $cohort->save();
+
+        return SuccessResponse('Team Has Been Added To Cohort Successfully');
     }
 
     public function deleteTeam($teamId)

@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateUserRequest;
+use App\Mail\SignUpMail;
 use App\Models\Role;
 use App\Models\User;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 
 class UserController extends Controller
 {
@@ -28,6 +31,28 @@ class UserController extends Controller
         }
 
         return $users;
+    }
+
+    public function disableUser($userId){
+        $user = User::find($userId);
+
+        if(!$user) return ErrorResponse('Error Fetching User');
+
+        $user->is_disabled = true;
+        $user->save();
+
+        return SuccessResponse('User Successfully Disabled', $user);
+    }
+
+    public function enableUser($userId){
+        $user = User::find($userId);
+
+        if(!$user) return ErrorResponse('Error Fetching User');
+
+        $user->is_disabled = false;
+        $user->save();
+
+        return SuccessResponse('User Successfully Enabled', $user);
     }
 
     public function roleUsers($role_id)
@@ -84,6 +109,12 @@ class UserController extends Controller
 
         $user->role_name = $role->role_name;
 
+        try {
+            Mail::to($user->email)->send(new SignUpMail($user));
+        } catch (Exception $err) {
+            return ErrorResponse('Error Sending Mail');
+        }
+
         return SuccessResponse('User Created Successfully', $user);
     }
 
@@ -124,5 +155,20 @@ class UserController extends Controller
         ];
 
         return SuccessResponse('User Logged In Successfully', $responseData);
+    }
+
+    public function resetUserPassword ($userId){
+
+        $user = User::find($userId);
+
+        if(!$user) return ErrorResponse('User Does Not Exist');
+
+        $newPassword = generateRandom();
+
+        $user->password = Hash::make($newPassword);
+        $user->save();
+
+        return SuccessResponse('User Password Reset Successfully', $user);
+
     }
 }

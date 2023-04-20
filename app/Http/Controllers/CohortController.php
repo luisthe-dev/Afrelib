@@ -43,6 +43,35 @@ class CohortController extends Controller
         return $cohorts;
     }
 
+    public function getSingleCohort($cohortId)
+    {
+        $cohort = Cohort::where(['is_deleted' => false, 'cohort_id' => $cohortId])->first();
+
+        $cohort_mentors = json_decode($cohort->cohort_mentors, true);
+        $cohort->mentors = sizeof($cohort_mentors);
+
+        $cohort_panelists = json_decode($cohort->cohort_panelists, true);
+        $cohort->panelists = sizeof($cohort_panelists);
+
+        $cohort_teams = json_decode($cohort->cohort_teams, true);
+        $cohort->teams = sizeof($cohort_teams);
+
+        $cohort_students = 0;
+        foreach ($cohort_teams as $cohort_team) {
+            $team = Team::where(['id' => $cohort_team, 'is_deleted' => false])->first();
+
+            if (!$team) continue;
+
+            $team_students = json_decode($team->team_members, true);
+
+            $cohort_students = $cohort_students + sizeof($team_students);
+        }
+        $cohort->students = $cohort_students;
+
+
+        return SuccessResponse('Cohort Details Fetched Successfully', $cohort);
+    }
+
     public function addPanelist(Request $request, $cohortId)
     {
 

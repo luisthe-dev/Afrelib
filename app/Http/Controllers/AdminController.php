@@ -11,6 +11,10 @@ use Illuminate\Support\Facades\Hash;
 class AdminController extends Controller
 {
 
+    public function getAllAdmins () {
+        return Admin::all();
+    }
+
     public function createAdmin(CreateAdminRequest $request)
     {
 
