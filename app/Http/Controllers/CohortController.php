@@ -92,7 +92,7 @@ class CohortController extends Controller
         $mentors['count'] = sizeof($cohort_mentors);
         $panelists['count'] = sizeof($cohort_panelists);
         $teams['count'] = sizeof($cohort_teams);
-        $students['count'] = sizeof($cohort_students);
+        $students['count'] = $cohort_students;
 
         $cohort->mentors = $mentors;
         $cohort->panelists = $panelists;
