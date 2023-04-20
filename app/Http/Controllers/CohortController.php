@@ -85,7 +85,7 @@ class CohortController extends Controller
                 if (!$single) continue;
                 array_push($students['data'], $single);
             }
-            array_push($team['data'], $team);
+            array_push($teams['data'], $team);
             $cohort_students = $cohort_students + sizeof($team_students);
         }
 
