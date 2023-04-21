@@ -203,13 +203,13 @@ class CohortController extends Controller
         foreach ($teams as $team) {
             $single = Team::where(['id' => $team])->first();
             if (!$single) return  ErrorResponse('Team With Id: ' . $team . ' Does Not Exist');
-            $teamExist = Cohort::where([['cohort_teams', 'like', '%,' . $team . ',%']])->get();
+            $teamExist = Cohort::where([['cohort_teams', 'like', '%' . $team . '%']])->get();
 
             foreach ($teamExist as $single) {
                 $singleTeams = json_decode($single->cohort_teams, true);
 
                 foreach ($singleTeams as $teams) {
-                    if ($teams->id == $team->id) return ErrorResponse('Team Already Belongs To A Cohort');
+                    if ($teams->id == $team->id) return ErrorResponse('Team With Id: ' . $team . ' Already Belongs To A Cohort');
                 }
             }
             array_push($teamsData, $single);

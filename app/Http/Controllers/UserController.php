@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CreateUserRequest;
 use App\Mail\SignUpMail;
 use App\Models\Role;
+use App\Models\Team;
 use App\Models\User;
 use Carbon\Carbon;
 use Exception;
@@ -33,10 +34,38 @@ class UserController extends Controller
         return $users;
     }
 
-    public function disableUser($userId){
+    public function sudentsNotInTeams()
+    {
+
+        $studentId = Role::where(['role_name' => 'Student'])->first()->role_id;
+        $returnStudents = array();
+
+        User::where(['role_id' => $studentId])->chunkById(200, function ($students) use (&$returnStudents) {
+
+            foreach ($students as $student) {
+                $teams = Team::where([['team_members', 'like', '%' . $student->id . '%']])->get();
+
+                if (sizeof($teams) == 0) array_push($returnStudents, $student);
+
+                foreach ($teams as $team) {
+                    $teamStudents = json_decode($team->team_members, true);
+
+                    if (in_array($student->id, $teamStudents)) continue;
+
+                    array_push($returnStudents, $student);
+                }
+            }
+        });
+
+
+        return SuccessResponse('Students Fetched Successfully', $returnStudents);
+    }
+
+    public function disableUser($userId)
+    {
         $user = User::find($userId);
 
-        if(!$user) return ErrorResponse('Error Fetching User');
+        if (!$user) return ErrorResponse('Error Fetching User');
 
         $user->is_disabled = true;
         $user->save();
@@ -44,10 +73,11 @@ class UserController extends Controller
         return SuccessResponse('User Successfully Disabled', $user);
     }
 
-    public function enableUser($userId){
+    public function enableUser($userId)
+    {
         $user = User::find($userId);
 
-        if(!$user) return ErrorResponse('Error Fetching User');
+        if (!$user) return ErrorResponse('Error Fetching User');
 
         $user->is_disabled = false;
         $user->save();
@@ -157,11 +187,12 @@ class UserController extends Controller
         return SuccessResponse('User Logged In Successfully', $responseData);
     }
 
-    public function resetUserPassword ($userId){
+    public function resetUserPassword($userId)
+    {
 
         $user = User::find($userId);
 
-        if(!$user) return ErrorResponse('User Does Not Exist');
+        if (!$user) return ErrorResponse('User Does Not Exist');
 
         $newPassword = generateRandom();
 
@@ -169,6 +200,5 @@ class UserController extends Controller
         $user->save();
 
         return SuccessResponse('User Password Reset Successfully', $user);
-
     }
 }

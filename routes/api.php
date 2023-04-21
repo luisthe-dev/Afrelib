@@ -28,6 +28,8 @@ Route::middleware(['auth:sanctum', 'ability:superiorAdmin'])->group(function () 
     Route::post('team/create', [TeamController::class, 'createTeam']);
     Route::put('team/{teamId}/mentor', [TeamController::class, 'updateMentor']);
     Route::delete('team/{teamId}', [TeamController::class, 'deleteTeam']);
+
+    Route::get('students/unmatched', [UserController::class, 'sudentsNotInTeams']);
 });
 
 Route::get('roles', [RoleController::class, 'getRoles']);

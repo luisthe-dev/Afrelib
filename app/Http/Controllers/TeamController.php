@@ -100,6 +100,13 @@ class TeamController extends Controller
         foreach ($students as $student) {
             $single = User::where(['id' => $student, 'role_id' => $studentId])->first();
             if (!$single) return ErrorResponse('Student With Id: ' . $student . ' Does Not Exist');
+            $teamExist = Team::where([['team_members', 'like', '%' . $student . '%']])->get();
+
+            foreach ($teamExist as $team) {
+                $teamMembers = json_decode($team->team_members, true);
+
+                if (in_array($student, $teamMembers)) return ErrorResponse('Student With Id: ' . $student . ' Already Belongs To A Team');
+            }
             array_push($studentData, $single);
         }
 
@@ -126,18 +133,7 @@ class TeamController extends Controller
 
         $team->save();
 
-        if ($cohortId) {
-            $cohortTeams = json_decode($cohort->cohort_teams, true);
-            array_push($cohortTeams, $team->team_id);
-
-            $cohortMentors = json_decode($cohort->cohort_mentors, true);
-            if (!in_array($request->mentorId, $cohortMentors)) array_push($cohortMentors, $request->mentorId);
-
-            $cohort->cohort_teams = json_encode($cohortTeams);
-            $cohort->cohort_mentors = json_encode($cohortMentors);
-
-            $cohort->save();
-        }
+        if ($cohortId) $this->addTeamToCohort($cohortId, $team->id);
 
         $team->students = $studentData;
         $team->mentor = $mentor;
