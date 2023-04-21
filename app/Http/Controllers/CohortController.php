@@ -47,6 +47,8 @@ class CohortController extends Controller
     {
         $cohort = Cohort::where(['is_deleted' => false, 'cohort_id' => $cohortId])->first();
 
+        if (!$cohort) return ErrorResponse('Cohort Does Not Exist');
+
         $studentId = DB::table('roles')->where(['role_name' => 'Student'])->first()->role_id;
         $panelistId = DB::table('roles')->where(['role_name' => 'Panelist'])->first()->role_id;
         $mentorId = DB::table('roles')->where(['role_name' => 'Mentor'])->first()->role_id;
@@ -201,6 +203,15 @@ class CohortController extends Controller
         foreach ($teams as $team) {
             $single = Team::where(['id' => $team])->first();
             if (!$single) return  ErrorResponse('Team With Id: ' . $team . ' Does Not Exist');
+            $teamExist = Cohort::where([['cohort_teams', 'like', '%,' . $team . ',%']])->get();
+
+            foreach ($teamExist as $single) {
+                $singleTeams = json_decode($single->cohort_teams, true);
+
+                foreach ($singleTeams as $teams) {
+                    if ($teams->id == $team->id) return ErrorResponse('Team Already Belongs To A Cohort');
+                }
+            }
             array_push($teamsData, $single);
         }
 
