@@ -99,6 +99,7 @@ class CohortController extends Controller
         $cohort->mentors = $mentors;
         $cohort->panelists = $panelists;
         $cohort->teams = $teams;
+        $cohort->students = $students;
 
 
         return SuccessResponse('Cohort Details Fetched Successfully', $cohort);
