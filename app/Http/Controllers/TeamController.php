@@ -142,7 +142,7 @@ class TeamController extends Controller
         return SuccessResponse('Team Created Successfully', $team);
     }
 
-    public function updateMentor(Request $request, $teamId)
+    public function updateMentor(Request $request, $teamId) 
     {
         $request->validate([
             'mentorId' => 'required|integer'

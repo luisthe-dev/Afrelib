@@ -97,6 +97,7 @@ class UserController extends Controller
 
         $User = User::where(['email' => $request->email])->first();
 
+
         if (!$User) return ErrorResponse('Invalid Login Parameters');
 
         if (!Hash::check($request->password, $User->password)) return ErrorResponse('Invalid Login Parameters');
