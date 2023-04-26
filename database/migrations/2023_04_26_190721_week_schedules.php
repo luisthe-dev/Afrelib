@@ -13,14 +13,10 @@ return new class extends Migration
     {
         Schema::create('submissions', function (Blueprint $table) {
             $table->id();
-            $table->integer('project_id');
-            $table->integer('submitter_id');
-            $table->string('submission_title');
-            $table->string('submission_url')->nullable();
-            $table->longText('submission_comment');
-            $table->longText('submission_attachments');
-            $table->integer('submission_week');
-            $table->longText('panelist_feedback');
+            $table->string('cohort_id');
+            $table->integer('week_number');
+            $table->date('week_start');
+            $table->date('week_end');
             $table->timestamps();
         });
     }
@@ -30,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('submissions');
+        //
     }
 };
