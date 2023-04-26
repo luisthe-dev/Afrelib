@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('submissions', function (Blueprint $table) {
+        Schema::create('week_schedules', function (Blueprint $table) {
             $table->id();
             $table->string('cohort_id');
             $table->integer('week_number');
