@@ -178,7 +178,7 @@ class CohortController extends Controller
 
     public function createCohort(CreateCohortRequest $request)
     {
-        $mentors = $request->mentorIds;
+        $mentors = $request->mentorIds; 
         $teams = $request->teamIds;
         $panelists = $request->panelistIds;
 

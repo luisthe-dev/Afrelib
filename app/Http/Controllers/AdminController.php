@@ -25,7 +25,7 @@ class AdminController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password)
         ]);
-
+ 
         $newAdmin->save();
 
         return SuccessResponse('Admin Created Successfully', $newAdmin);
