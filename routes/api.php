@@ -4,13 +4,24 @@ use App\Http\Controllers\CohortController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/status', [Controller::class, 'getStatus']);
 
+Route::middleware(['auth:sanctum'])->group(function () {
+
+    Route::post('/project/create', [ProjectController::class, 'createProject']);
+});
+
 Route::middleware(['auth:sanctum', 'ability:superiorAdmin'])->group(function () {
+
+    Route::post('upload/{uploadType}', [Controller::class, 'uploadFile']);
+
+    Route::get('students/unmatched', [UserController::class, 'sudentsNotInTeams']);
+
     Route::get('cohorts', [CohortController::class, 'getAllCohorts']);
     Route::post('cohort', [CohortController::class, 'createCohort']);
     Route::get('cohort/{cohortId}', [CohortController::class, 'getSingleCohort']);
@@ -28,8 +39,6 @@ Route::middleware(['auth:sanctum', 'ability:superiorAdmin'])->group(function () 
     Route::post('team/create', [TeamController::class, 'createTeam']);
     Route::put('team/{teamId}/mentor', [TeamController::class, 'updateMentor']);
     Route::delete('team/{teamId}', [TeamController::class, 'deleteTeam']);
-
-    Route::get('students/unmatched', [UserController::class, 'sudentsNotInTeams']);
 });
 
 Route::get('roles', [RoleController::class, 'getRoles']);

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateTeamRequest;
 use App\Models\Cohort;
+use App\Models\Project;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -134,6 +135,15 @@ class TeamController extends Controller
         $team->save();
 
         if ($cohortId) $this->addTeamToCohort($cohortId, $team->id);
+
+        $project = new Project([
+            'cohort_id' => $cohortId,
+            'team_id' => $team->id,
+            'project_title' => 'Project 1',
+            'project_description' => 'Project Starter Template',
+        ]);
+
+        $project->save();
 
         $team->students = $studentData;
         $team->mentor = $mentor;
