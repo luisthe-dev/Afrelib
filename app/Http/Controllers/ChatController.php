@@ -10,6 +10,7 @@ use App\Models\chat;
 use App\Models\User;
 use App\Models\Cohort;
 use App\Models\Team;
+use App\Models\Role;
 
 class ChatController extends Controller
 {
@@ -153,26 +154,61 @@ class ChatController extends Controller
      {
          $panel_id= $request->panel_id . rand(0000,9999);
 
-         $user= user::where('role_id','panel')->get();
+         $role= Role::where('role_name', 'Panelist')->get();
+
+         $groupchat= groupChat::where('role','Panelist')->get();
+
+         if($groupchat->count() <= 0)
+         {
+            $user= user::where('role_id',$role[0]->role_id)->get();
  
-         for($i=0; $i<$user->count(); $i++){
-            
-             if($user->count() <= 0){
-                 return response()->json(['status' => 'Error', 'message' => 'No Panelist Found']);
-             }
-             else{
-                      // $request->participants[$i]
-             $gchat= new groupChat;
-             $gchat->team_id = $panel_id;
-             $gchat->team_name = "Panel" . $request->panel_id;
-             $gchat->participant = $user[0]->first_name;
-             $gchat->userId = "Panel" . $i+1;
-             $gchat->role= "Panel";
-             $gchat->save();
- 
-             }
- 
+            for($i=0; $i<$user->count(); $i++){
+               
+                if($user->count() <= 0){
+                    return response()->json(['status' => 'Error', 'message' => 'No Panelist Found']);
+                }
+                else{
+                         // $request->participants[$i]
+                $gchat= new groupChat;
+                $gchat->team_id = $panel_id;
+                $gchat->team_name = "Panelist" . $request->panel_id;
+                $gchat->participant = $user[0]->first_name;
+                $gchat->userId = "Panelist" . $i+rand(0000,9999);
+                $gchat->role= "Panelist";
+                $gchat->save();
+    
+                }
+    
+            }
          }
+         else{
+
+            $user= user::where('role_id',$role[0]->role_id)->get();
+ 
+            for($i=0; $i<$user->count(); $i++){
+               
+                if($user->count() <= 0){
+                    return response()->json(['status' => 'Error', 'message' => 'No Panelist Found']);
+                }
+                else{
+                    $groupchat= groupChat::where('participant',$user[0]->first_name)->get();
+
+                    if($groupchat->count() <=0){
+                        // $request->participants[$i]
+                                
+                        $groupchat->team_id = $panel_id;
+                        $groupchat->team_name = "Panelist" . $request->panel_id;
+                        $groupchat->participant = $user[0]->first_name;
+                        $groupchat->userId = "Panelist" . $i+rand(0000,9999);
+                        $groupchat->role= "Panelist";
+                        $groupchat->save();
+                    }
+                }
+    
+            }
+
+         }
+        
          return response()->json(['status' => 'Success', 'message' => 'Group chat created and team members added successfully.']);
  
      }
