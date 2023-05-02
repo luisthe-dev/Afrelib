@@ -9,6 +9,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\SubmissionController;
 use Illuminate\Support\Facades\Route;
 // use App\WebSocket\MyWebSocketHandler;
 // use BeyondCode\LaravelWebSockets\Facades\WebSocketsRouter;
@@ -18,9 +19,22 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/status', [Controller::class, 'getStatus']);
 
+Route::get('roles', [RoleController::class, 'getRoles']);
+
 Route::middleware(['auth:sanctum'])->group(function () {
 
-    Route::post('/project/create', [ProjectController::class, 'createProject']);
+    Route::prefix('project')->group(function () {
+        Route::get('', [ProjectController::class, 'getAllProjects']);
+
+        Route::post('create', [ProjectController::class, 'createProject']);
+        Route::put('/{projectId}', [ProjectController::class, 'updateProject']);
+        Route::get('{teamId}', [ProjectController::class, 'getTeamProjects']);
+        Route::get('cohort/{cohortId}', [ProjectController::class, 'getCohortProjects']);
+
+        Route::prefix('submission')->group(function () {
+            Route::post('{projectId}', [SubmissionController::class, 'createSubmission']);
+        });
+    });
 });
 
 Route::middleware(['auth:sanctum', 'ability:superiorAdmin'])->group(function () {
@@ -47,8 +61,6 @@ Route::middleware(['auth:sanctum', 'ability:superiorAdmin'])->group(function () 
     Route::put('team/{teamId}/mentor', [TeamController::class, 'updateMentor']);
     Route::delete('team/{teamId}', [TeamController::class, 'deleteTeam']);
 });
-
-Route::get('roles', [RoleController::class, 'getRoles']);
 
 Route::prefix('user')->group(function () {
     Route::post('signin', [UserController::class, 'loginUser']);

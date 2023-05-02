@@ -151,7 +151,7 @@ class TeamController extends Controller
         return SuccessResponse('Team Created Successfully', $team);
     }
 
-    public function updateMentor(Request $request, $teamId) 
+    public function updateMentor(Request $request, $teamId)
     {
         $request->validate([
             'mentorId' => 'required|integer'
@@ -183,18 +183,18 @@ class TeamController extends Controller
 
         if (!$team) return ErrorResponse('Team Does Not Exist');
 
-        $teamExist = Cohort::where([['cohort_teams', 'like', '%,' . $team_id . ',%']])->get();
+        $teamExist = Cohort::where([['cohort_teams', 'like', '%' . $team_id . '%']])->get();
 
         foreach ($teamExist as $single) {
             $singleTeams = json_decode($single->cohort_teams, true);
 
-            foreach ($singleTeams as $team) {
-                if ($team->id == $team_id) return ErrorResponse('Team Already Belongs To A Cohort');
+            foreach ($singleTeams as $singleTeam) {
+                if ($singleTeam == $team_id) return ErrorResponse('Team Already Belongs To A Cohort');
             }
         }
 
         $cohortTeams = json_decode($cohort->cohort_teams, true);
-        array_push($cohortTeams, $team_id);
+        array_push($cohortTeams, $team->id);
         $cohort->cohort_teams = json_encode($cohortTeams);
         $cohort->save();
 

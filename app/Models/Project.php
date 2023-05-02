@@ -15,5 +15,12 @@ class Project extends Model
         'project_title',
         'project_description',
         'status',
+        'is_deleted'
+    ];
+
+    protected $hidden = [
+        'team_id',
+        'cohort_id',
+        'is_deleted'
     ];
 }

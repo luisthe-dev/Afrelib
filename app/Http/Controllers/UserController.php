@@ -167,6 +167,21 @@ class UserController extends Controller
 
         if (!$role) return ErrorResponse('Error Confirming User Identity');
 
+        $teams = Team::where([['team_members', 'like', '%' . $User->id . '%']])->get();
+
+        $userTeam = null;
+
+        foreach ($teams as $team) {
+            $teamStudents = json_decode($team->team_members, true);
+
+            if (in_array($User->id, $teamStudents)) $userTeam = $team;
+        }
+
+        if (!$userTeam) {
+            $teams = Team::where(['team_mentor' =>  $User->id])->get();
+            $userTeam = $teams;
+        }
+
         $UserToken = $User->createToken('User Access Token', ['User', $role->role_name]);
 
         $accessToken = $UserToken->accessToken;
@@ -174,6 +189,7 @@ class UserController extends Controller
 
         $accessToken->save();
 
+        $User->team = $userTeam;
         $User->role_name = $role->role_name;
 
         $responseData = [
