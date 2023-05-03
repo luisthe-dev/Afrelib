@@ -17,6 +17,6 @@ class Submission extends Model
         'submission_comment',
         'submission_attachments',
         'submission_week',
-        'panelist_feedback',
+        'panelist_feedback'
     ];
 }

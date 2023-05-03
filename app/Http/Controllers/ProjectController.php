@@ -179,4 +179,38 @@ class ProjectController extends Controller
 
         return SuccessResponse('Cohort Projects Fetched Successfully', $cohort);
     }
+
+    public function getPanelistProjects(Request $request)
+    {
+
+        $panelistsId = DB::table('roles')->where(['role_name' => 'Panelist'])->first()->role_id;
+
+        $panelist = $request->user();
+
+        if ($panelist->role_id != $panelistsId) return ErrorResponse('Panelist Does Not Exist');
+
+        $panelistProjects = array();
+
+        $cohorts = Cohort::where([['cohort_panelists', 'like', '%' . $panelist->id . '%']])->get();
+
+        foreach ($cohorts as $cohort) {
+
+            $cohortPanelists = json_decode($cohort->cohort_panelists, true);
+
+            if (!in_array($panelist->id, $cohortPanelists)) continue;
+
+            $cohortProjects = Project::where(['cohort_id' => $cohort->cohort_id, 'is_deleted' => false])->get();
+
+            foreach ($cohortProjects as $cohortProject) {
+                $projectSubmissions = Submission::where(['project_id' => $cohortProject->id])->get();
+                $cohortProject->submissions = $projectSubmissions;
+            }
+
+            array_push($panelistProjects, $cohortProjects);
+        }
+
+        $panelist->cohort_projects = $panelistProjects;
+
+        return SuccessResponse('Panelist Attached Projects Fetched Successfully', $panelist);
+    }
 }

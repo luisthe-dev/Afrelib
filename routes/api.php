@@ -26,6 +26,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::prefix('project')->group(function () {
         Route::get('', [ProjectController::class, 'getAllProjects']);
 
+        Route::middleware(['ability:Panelist'])->group(function () {
+            Route::get('panelist', [ProjectController::class, 'getPanelistProjects']);
+            Route::get('submission/panelist/{projectId}', [SubmissionController::class, 'getProjectSubmissions']);
+            Route::put('submission/{action}/{submissionId}', [SubmissionController::class, 'updatePanelistFeedback']);
+        });
+
         Route::post('create', [ProjectController::class, 'createProject']);
         Route::put('/{projectId}', [ProjectController::class, 'updateProject']);
         Route::get('{teamId}', [ProjectController::class, 'getTeamProjects']);
