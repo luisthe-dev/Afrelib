@@ -203,6 +203,7 @@ class ProjectController extends Controller
 
             foreach ($cohortProjects as $cohortProject) {
                 $projectSubmissions = Submission::where(['project_id' => $cohortProject->id])->get();
+                if (sizeof($projectSubmissions) < 1) continue;
                 $cohortProject->submissions = $projectSubmissions;
             }
 
