@@ -201,6 +201,8 @@ class ProjectController extends Controller
 
             $cohortProjects = Project::where(['cohort_id' => $cohort->cohort_id, 'is_deleted' => false])->get();
 
+            if (sizeof($cohortProjects) < 1) continue;
+
             foreach ($cohortProjects as $cohortProject) {
                 $projectSubmissions = Submission::where(['project_id' => $cohortProject->id])->get();
                 if (sizeof($projectSubmissions) < 1) continue;

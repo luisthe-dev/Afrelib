@@ -163,4 +163,82 @@ class SubmissionController extends Controller
 
         return SuccessResponse('Action Performed Successfully');
     }
+
+    public function getSingleSubmission($submissionId)
+    {
+
+        $submission = Submission::where(['id' => $submissionId])->first();
+
+        if (!$submission) return ErrorResponse('Invalid Submission Selected');
+
+        $submissionFeedbacks = json_decode($submission->panelist_feedback, true);
+
+        $feedbacks = array();
+
+        foreach ($submissionFeedbacks as $submissionFeedback) {
+            $feedbackPanelist = $submissionFeedback['panelist_id'];
+            $submissionFeedback['panelist'] = User::where(['id' => $feedbackPanelist])->first();
+
+            array_push($feedbacks, $submissionFeedback);
+        }
+
+        $submission->panelist_feedback = $feedbacks;
+
+        return SuccessResponse('Submission Fetched Successfully', $submission);
+    }
+
+
+    public function getCohortSubmissions($cohortId)
+    {
+        $cohort = Cohort::where(['cohort_id' => $cohortId, 'is_deleted' => false])->first();
+
+        if (!$cohort) return ErrorResponse('Cohort Does Not Exist');
+
+        $projects = Project::where(['cohort_id' => $cohortId])->get();
+
+        $week1 = array();
+        $week2 = array();
+        $week3 = array();
+        $week4 = array();
+        $week5 = array();
+        $week6 = array();
+        $week7 = array();
+
+        foreach ($projects as $project) {
+            $submissions = Submission::where(['project_id' => $project->id])->get();
+
+            if (sizeof($submissions) < 1) continue;
+
+            foreach ($submissions as $submission) {
+                $submission->project = $project;
+
+                $feedbacks = array();
+
+                $submissionFeedbacks = json_decode($submission->panelist_feedback, true);
+
+                foreach ($submissionFeedbacks as $submissionFeedback) {
+                    $feedbackPanelist = $submissionFeedback['panelist_id'];
+                    $submissionFeedback['panelist'] = User::where(['id' => $feedbackPanelist])->first();
+
+                    array_push($feedbacks, $submissionFeedback);
+                }
+
+                $submission->panelist_feedback = $feedbacks;
+                $weekNumber = "week$submission->submission_week";
+                array_push($$weekNumber, $submission);
+            }
+        }
+
+        $weekData = array(
+            'Week 1' => $week1,
+            'Week 2' => $week2,
+            'Week 3' => $week3,
+            'Week 4' => $week4,
+            'Week 5' => $week5,
+            'Week 6' => $week6,
+            'Week 7' => $week7,
+        );
+
+        return SuccessResponse('Submissions Fetched Successfully', $weekData);
+    }
 }
