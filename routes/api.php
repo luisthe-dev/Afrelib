@@ -73,8 +73,9 @@ Route::middleware(['auth:sanctum', 'ability:superiorAdmin'])->group(function () 
     Route::delete('team/{teamId}', [TeamController::class, 'deleteTeam']);
 
     Route::post('update', [UpdatesController::class, 'createUpdates']);
-    Route::get('update', [UpdatesController::class, 'getAllUpdates']);
 });
+
+Route::get('update', [UpdatesController::class, 'getAllUpdates']);
 
 Route::prefix('user')->group(function () {
     Route::post('signin', [UserController::class, 'loginUser']);
