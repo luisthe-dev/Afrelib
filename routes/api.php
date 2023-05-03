@@ -10,6 +10,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\SubmissionController;
+use App\Http\Controllers\UpdatesController;
 use Illuminate\Support\Facades\Route;
 // use App\WebSocket\MyWebSocketHandler;
 // use BeyondCode\LaravelWebSockets\Facades\WebSocketsRouter;
@@ -70,6 +71,9 @@ Route::middleware(['auth:sanctum', 'ability:superiorAdmin'])->group(function () 
     Route::post('team/create', [TeamController::class, 'createTeam']);
     Route::put('team/{teamId}/mentor', [TeamController::class, 'updateMentor']);
     Route::delete('team/{teamId}', [TeamController::class, 'deleteTeam']);
+
+    Route::post('update', [UpdatesController::class, 'createUpdates']);
+    Route::get('update', [UpdatesController::class, 'getAllUpdates']);
 });
 
 Route::prefix('user')->group(function () {
