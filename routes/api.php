@@ -46,11 +46,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::get('cohort/{cohortId}', [SubmissionController::class, 'getCohortSubmissions']);
         });
     });
+
+    Route::post('upload/{uploadType}', [Controller::class, 'uploadFile']);
 });
 
 Route::middleware(['auth:sanctum', 'ability:superiorAdmin'])->group(function () {
-
-    Route::post('upload/{uploadType}', [Controller::class, 'uploadFile']);
 
     Route::get('students/unmatched', [UserController::class, 'sudentsNotInTeams']);
 
