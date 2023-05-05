@@ -109,7 +109,6 @@ class CohortController extends Controller
 
         }
 
-
         return SuccessResponse('Panelists Updated Successfully');
     }
 

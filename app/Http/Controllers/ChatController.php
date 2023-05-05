@@ -99,6 +99,7 @@ class ChatController extends Controller
             $chat->chatDescription = $request->chatDescription;
             $chat->chatType = $request->chatType;
             $chat->userId = $request->userIds[$i];
+            
 
             // return response()->json([$request->userIds[$i]]);
 

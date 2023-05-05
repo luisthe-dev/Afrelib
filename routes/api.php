@@ -80,10 +80,17 @@ Route::prefix('chat')->group(function () {
 
 
 // Sending messages to users
-Route::post('chat/{chat_id}/message', [MessageController::class, 'sendMessage'])->middleware('auth:api');
+Route::post('chat/{chat_id}/message', [MessageController::class, 'sendMessage']);
 
 // Retrieving messages to users
 Route::get('chat/{chat_id}/messages', [MessageController::class, 'retrieveMessage']);
+
+// Getting message status receipt
+Route::get('chat/{chat_id}/messagereciept', [MessageController::class, 'Messagereciept']);
+
+// Getting total number of unread messages 
+Route::get('chat/{chat_id}/unread', [MessageController::class, 'UnreadMessages']);
+
 
     // Route::get('chat/{chat_id}/message', [MessageController::class, 'sendMessage']);
     // WebSocketsRouter::webSocket('chat/{chat_id}/message', [MessageController::class, 'sendMessage']);
