@@ -115,8 +115,20 @@ Route::prefix('admin')->group(function () {
 
 
 
+
 // Chat System
 
+// Creating Group chat and adding participants to the chat
+Route::prefix('group-chat')->group(function () {
+    Route::post('team', [ChatController::class, 'creategroupChat']);
+    Route::post('panel', [ChatController::class, 'panelist']);
+    Route::post('adminMentor', [ChatController::class, 'groupAdminMentor']);
+});
+
+// Getting all group chats belonging to a particular user
+Route::prefix('chat')->group(function () {
+    Route::get('user/{user_id}/groups', [ChatController::class, 'getGroupChat']);
+});
 
 
 // Creating Group chat and adding participants to the chat
@@ -145,6 +157,20 @@ Route::get('chat/{chat_id}/messagereciept', [MessageController::class, 'Messager
 // Getting total number of unread messages
 Route::get('chat/{chat_id}/unread', [MessageController::class, 'UnreadMessages']);
 
+
+// Route::get('chat/{chat_id}/message', [MessageController::class, 'sendMessage']);
+// WebSocketsRouter::webSocket('chat/{chat_id}/message', [MessageController::class, 'sendMessage']);
+// Authenticating Messages
+Route::middleware(['auth:sanctum'])->group(function () {
+    // Sending messages to users
+    Route::post('chat/{chat_id}/message', [MessageController::class, 'sendMessage']);
+
+    // Retrieving messages to users
+    Route::get('chat/{chat_id}/messages', [MessageController::class, 'retrieveMessage']);
+
+    // Getting total number of unread messages
+    Route::get('chat/{chat_id}/unread', [MessageController::class, 'UnreadMessages']);
+});
 
 // Route::get('chat/{chat_id}/message', [MessageController::class, 'sendMessage']);
 // WebSocketsRouter::webSocket('chat/{chat_id}/message', [MessageController::class, 'sendMessage']);
@@ -192,6 +218,20 @@ Route::get('chat/{chat_id}/unread', [MessageController::class, 'UnreadMessages']
 //     });
 // });
 
+// Router::webSocket('/chat/{chat_id}/message', function ($webSocket) {
+//     $webSocket->on('ChatMessages', function ($eventData) {
+//         // Instantiate your WebSocket controller
+//         $webSocketController = Router::withController('App\Http\Controllers\MessageController');
+
+//         // Call the method on your controller that handles the event
+//         $webSocketController->handleYourEvent($eventData);
+//     });
+// });
+
+// Admin Priviledges
+// Route::middleware(['auth:sanctum', 'ability:superiorAdmin'])->group(function () {
+
+// Delete user from group chat
 // Router::webSocket('/chat/{chat_id}/message', function ($webSocket) {
 //     $webSocket->on('ChatMessages', function ($eventData) {
 //         // Instantiate your WebSocket controller
