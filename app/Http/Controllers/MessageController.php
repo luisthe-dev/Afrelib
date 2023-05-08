@@ -80,6 +80,9 @@ class MessageController extends Controller
         // } 
 
         $rand= $chat_id. rand(0000,9999);
+        if(!$request->mediaUrl){
+            $request->mediaUrl = "No file found";
+        }
 
         $SaveMessage=  new ChatMessages;
         $SaveMessage->messageId= $rand;
