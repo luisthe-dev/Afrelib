@@ -55,28 +55,29 @@ class MessageController extends Controller
         }
         
 
-        if ($request->mediaType != "text" || $request->mediaType != "emoji") {
+        // if ($request->mediaType != "text" || $request->mediaType != "emoji") {
             // Saving image file
 
             
-            $validator = Validator::make($request->all(), [
-                'mediaUrl' => 'required|image'
-            ]);
+            // $validator = Validator::make($request->all(), [
+            //     'mediaUrl' => 'required|image'
+            // ]);
         
-            if ($validator->fails()) {
-                return response()->json(['error' => $validator->errors()], 422);
-            }
+            // if ($validator->fails()) {
+            //     return response()->json(['error' => $validator->errors()], 422);
+            // }
             
         
             // $imageData = file_get_contents($request->mediaUrl);
             // $fileName = basename($request->mediaUrl);
             // Storage::put('fileimages/'.$fileName, $imageData);
 
-            $file = $request->file('mediaUrl');
-            $fileName = $file->getClientOriginalName();
-            $filePath = $file->storeAs('public/images', $fileName);
+            // $file = $request->file('mediaUrl');
+            // $fileName = $file->getClientOriginalName();
+            // $filePath = $file->storeAs('public/images', $fileName);
 
-        } 
+
+        // } 
 
         $rand= $chat_id. rand(0000,9999);
 
@@ -85,7 +86,7 @@ class MessageController extends Controller
         $SaveMessage->chatId= $chat_id;
         $SaveMessage->content= $request->content;
         $SaveMessage->mediaType= $request->mediaType;
-        $SaveMessage->mediaUrl= $filePath;
+        $SaveMessage->mediaUrl= $request->mediaUrl;
         $SaveMessage->senderId= $request->senderId;
         $SaveMessage->senderName= $request->senderName;
         $SaveMessage->timestamp= $request->timestamp;
@@ -98,7 +99,7 @@ class MessageController extends Controller
             "chatId" => $chat_id,
             "content" => $request->content,
             "mediaType" => $request->mediaType,
-            "mediaUrl" => $filePath,
+            "mediaUrl" => $request->mediaUrl,
             "senderId" => $request->senderId,
             "senderName" => $request->senderName,
             "timestamp" => $request->timestamp,
