@@ -18,9 +18,9 @@ class MessageController extends Controller
     public function sendMessage(Request $request, $chat_id)
     {
          // Check if the user is authenticated
-    if (!$request->user()) {
-        return response()->json(['error' => 'You are currently not authenticated'], 404);
-    }
+    // if (!$request->user()) {
+    //     return response()->json(['error' => 'You are currently not authenticated'], 404);
+    // }
 
     // Check chat id id it exists 
     $chat= chat::where('chatId', $chat_id)->get();
@@ -125,14 +125,14 @@ class MessageController extends Controller
 
     public function retrieveMessage($chat_id){
              // Check if the user is authenticated
-    if (!$request->user()) {
-        return response()->json(['error' => 'You are currently not authenticated'], 404);
-    }
+    // if (!$request->user()) {
+    //     return response()->json(['error' => 'You are currently not authenticated'], 404);
+    // }
         // Check chat id id it exists 
-        $chat= chat::where('chatId', $chat_id)->get();
+        $chat= ChatMessages::where('chatId', $chat_id)->get();
         if($chat->count() <=0)
         {
-            return response()->json(['error' => 'Chat ID does not exist'], 404);
+            return response()->json(['error' => 'No message as been sent by this group'], 404);
         }
 
         $message= ChatMessages::where('chatId', $chat_id)->paginate(10);
