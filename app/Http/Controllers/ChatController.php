@@ -217,7 +217,7 @@ class ChatController extends Controller
      
      public function groupAdminMentor(Request $request)
      {
-        $group_id= $request->groupid . rand(0000,9999);
+        $group_id= base64_encode("admin"."mentor");
 
         $admin = admin::all();
         $user= user::where('role_id','mentor')->get();
@@ -309,9 +309,12 @@ class ChatController extends Controller
                         return response()->json(['error' => 'User is already in the group chat'], 404);
                     }
 
+                    // Getting all Panelist 
+                    $Role= Role::where('role_name', 'Panelist')->get();
+
                     // Getting users details from table and creating chat
                    
-                    $user= User::where('id',$getteamMembersID[$a])->get();
+                    $user= User::where('id',$getteamMembersID[$a])->where('role_id', '!=' , $Role[0]->role_id)->get();
                    
                     // return response()->json([substr($cohort_id, 0, 2)]);
                     $chat= new Chat;

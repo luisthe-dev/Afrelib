@@ -8,7 +8,9 @@ use BeyondCode\LaravelWebSockets\Facades\WebSocketsRouter;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 use App\Models\chat;
+use App\Models\groupChat;
 use App\Models\ChatMessages;
+use App\Models\unreadMessage;
 
 
 
@@ -94,6 +96,19 @@ class MessageController extends Controller
         $SaveMessage->status= "UnRead";
         $SaveMessage->save();
 
+
+        $chat= chat::where('chatId', $chat_id)->where('userId', '!=', $request->senderId)->get();
+        for($i=0; $i<$chat->count(); $i++){
+            $unreadMessage = new unreadMessage;
+            $unreadMessage->chatId = $chat_id;
+            $unreadMessage->messageId = $rand;
+            $unreadMessage->userId = $chat[$i]->userId;
+            $unreadMessage->username = $chat[$i]->firstName . ' ' .$chat[$i]->lastName;
+            $unreadMessage->status = 'Unread';
+            $unreadMessage->save();
+        }
+      
+
         
         return response()->json([
             "messageId" => $rand,
@@ -148,9 +163,6 @@ class MessageController extends Controller
             }
         
         }
-       
-        
-       
 
         return response()->json([$message], 200);
     }
@@ -186,6 +198,29 @@ class MessageController extends Controller
         // }
         
 
+    }
+
+    public function groupchatMembers($teamId)
+    {
+        $ChatMembers = groupChat::where('team_id',$teamId)->get();
+
+        if($ChatMembers->count() > 0){
+            return response()->json([$ChatMembers], 202);
+        }else{
+            return response()->json(['error' => 'No members found in this group chat'], 404);
+        }
+
+    }
+    public function IndividualunreadMessages($chatId){
+        $unreadMessage= unreadMessage::where('chatId', $chatId)->get();
+
+        if($unreadMessage->count() > 0){
+            return response()->json([$unreadMessage], 202);
+        }
+        else{
+            return response()->json(['Could not find chat Id in unread messages'], 404);
+        }
+        
     }
 
 
