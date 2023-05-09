@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateUserRequest;
 use App\Mail\SignUpMail;
+use App\Models\Cohort;
 use App\Models\Role;
 use App\Models\Team;
 use App\Models\User;
@@ -142,7 +143,8 @@ class UserController extends Controller
         try {
             Mail::to($user->email)->send(new SignUpMail($user));
         } catch (Exception $err) {
-            return ErrorResponse('Error Sending Mail');
+            dd($err);
+            return ErrorResponse('Error Sending Mail', $err);
         }
 
         return SuccessResponse('User Created Successfully', $user);
@@ -177,6 +179,18 @@ class UserController extends Controller
             if (in_array($User->id, $teamStudents)) $userTeam = $team;
         }
 
+        $userCohort = null;
+
+        if ($userTeam) {
+            $cohorts = Cohort::where([['cohort_teams', 'like', '%' . $userTeam->id . '%']])->get();
+
+            foreach ($cohorts as $cohort) {
+                $cohortTeams = json_decode($cohort->cohort_teams, true);
+
+                if (in_array($userTeam->id, $cohortTeams)) $userCohort = $cohort;
+            }
+        }
+
         if (!$userTeam) {
             $teams = Team::where(['team_mentor' =>  $User->id])->get();
             $userTeam = $teams;
@@ -190,6 +204,7 @@ class UserController extends Controller
         $accessToken->save();
 
         $User->team = $userTeam;
+        $User->cohort = $userCohort;
         $User->role_name = $role->role_name;
 
         $responseData = [
