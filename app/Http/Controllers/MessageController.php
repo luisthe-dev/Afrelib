@@ -80,9 +80,7 @@ class MessageController extends Controller
         // } 
 
         $rand= $chat_id. rand(0000,9999);
-        if(!$request->mediaUrl){
-            $request->mediaUrl = "No file found";
-        }
+      
 
         $SaveMessage=  new ChatMessages;
         $SaveMessage->messageId= $rand;
@@ -140,6 +138,20 @@ class MessageController extends Controller
         }
 
         $message= ChatMessages::where('chatId', $chat_id)->paginate(10);
+
+        $messagestatus= ChatMessages::where('chatId', $chat_id)->where('status', 'UnRead')->get();
+
+        if($messagestatus->count() > 0){
+            for($i=0; $i < $messagestatus->count(); $i++){
+                $messagestatus[$i]->status = "Read";
+                $messagestatus[$i]->save();
+            }
+        
+        }
+       
+        
+       
+
         return response()->json([$message], 200);
     }
 
@@ -155,21 +167,23 @@ class MessageController extends Controller
 
         $messagestatus= ChatMessages::where('chatId', $chat_id)->where('status', 'UnRead')->get();
 
-        if($messagestatus->count() > 0){
-            for($i=0; $i < $messagestatus->count(); $i++){
-                $messagestatus[$i]->status = "Read";
-                $messagestatus[$i]->save();
-            }
-           
-            return response()->json(['Unread Messages' => $messagestatus->count()], 200);
-        }
-        elseif($messagestatus->count() <= 0){
+        return response()->json(['Unread Messages' => $messagestatus->count()], 200);
 
-            return response()->json(['Unread Messages' => 0], 200);
-        }
-        else{
-            return response()->json(['error' => 'Could not process query'], 404);
-        }
+        // if($messagestatus->count() > 0){
+        //     for($i=0; $i < $messagestatus->count(); $i++){
+        //         $messagestatus[$i]->status = "Read";
+        //         $messagestatus[$i]->save();
+        //     }
+           
+        //     return response()->json(['Unread Messages' => $messagestatus->count()], 200);
+        // }
+        // elseif($messagestatus->count() <= 0){
+
+        //     return response()->json(['Unread Messages' => 0], 200);
+        // }
+        // else{
+        //     return response()->json(['error' => 'Could not process query'], 404);
+        // }
         
 
     }
