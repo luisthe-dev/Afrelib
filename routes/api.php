@@ -30,9 +30,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::middleware(['ability:Panelist'])->group(function () {
             Route::get('panelist', [ProjectController::class, 'getPanelistProjects']);
             Route::prefix('submission')->group(function () {
-                Route::get('panelist/{projectId}', [SubmissionController::class, 'getProjectSubmissions']);
                 Route::put('{action}/{submissionId}', [SubmissionController::class, 'updatePanelistFeedback']);
-                Route::get('single/{submissionId}', [SubmissionController::class, 'getSingleSubmission']);
             });
         });
 
@@ -44,6 +42,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::prefix('submission')->group(function () {
             Route::post('{projectId}', [SubmissionController::class, 'createSubmission']);
             Route::get('cohort/{cohortId}', [SubmissionController::class, 'getCohortSubmissions']);
+            Route::get('panelist/{projectId}', [SubmissionController::class, 'getProjectSubmissions']);
+            Route::get('single/{submissionId}', [SubmissionController::class, 'getSingleSubmission']);
         });
     });
 
