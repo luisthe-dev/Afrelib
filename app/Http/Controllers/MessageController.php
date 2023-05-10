@@ -223,5 +223,31 @@ class MessageController extends Controller
         
     }
 
+    public function readchat($chat_id, $userId)
+    {
+        // Checking chat ID 
+        $chatId= unreadMessage::where('chatId', $chat_id)->get();
+        
+        if($chatId->count() < 0){
+            return response()->json(['Could not find chat ID'], 404);
+        }
+
+        // Checking User ID 
+        $user_Id= unreadMessage::where('userId', $userId)->get();
+        
+        if($user_Id->count() < 0){
+            return response()->json(['Could not find User ID'], 404);
+        }
+
+        // Updating the status of messages
+        $unread = unreadMessage::where('chatId', $chat_id)->where('userId', $userId)->get();
+ 
+        for($i=0; $i < $unread->count(); $i++){
+            $unread[$i]->status = "Read";
+            $unread[$i]->save();
+        }
+    
+    }
+
 
 }

@@ -94,6 +94,10 @@ Route::prefix('admin')->group(function () {
         // Retrieving all memebers of a group chat using teamID
         Route::get('chat/{team_id}/members', [MessageController::class, 'groupchatMembers']);
 
+        // Returning all unread messages back to read 
+        Route::get('chat/{chat_id}/user/{userId}/read', [MessageController::class, 'readchat']);
+
+
 });
 
     // Route::get('chat/{chat_id}/message', [MessageController::class, 'sendMessage']);

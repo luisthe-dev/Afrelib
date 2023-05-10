@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Models\Admin;
 use Carbon\Carbon;
 use App\Models\groupChat;
@@ -11,6 +12,8 @@ use App\Models\User;
 use App\Models\Cohort;
 use App\Models\Team;
 use App\Models\Role;
+use App\Models\unreadMessage;
+
 
 class ChatController extends Controller
 {
@@ -138,13 +141,25 @@ class ChatController extends Controller
             return response()->json(['Status' => 'failed', 'message' => 'User does not exist']);
         }
 
+        // Getting all unread messages 
+       // Get the chats with the count of user IDs where status is unread
+        $unread = DB::table('unreadmessages')
+        ->select('chatId', DB::raw('COUNT(userId) as unreadmessages'))->where('userId', $user_id)
+        ->where('status', 'unread')
+        ->groupBy('chatId')
+        ->get();
+
+        // Return the chats as JSON
+        // return response()->json($chats);
+        // $groupuser->unread= $chats;
 
         return response()->json(["total"=> $groupuser->count(),
                                 "per_page" => "10",
                                 "current_page" => "1",
                                 "last_page" => $groupuser->count(),
                                 "data" => [
-                                    $groupuser
+                                    $groupuser,
+                                    $unread
                                     
                                 ]]);
             }
