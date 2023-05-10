@@ -19,6 +19,7 @@ class MessageController extends Controller
     //
     public function sendMessage(Request $request, $chat_id)
     {
+        event(new \App\Events\ChatMessages());
          // Check if the user is authenticated
     // if (!$request->user()) {
     //     return response()->json(['error' => 'You are currently not authenticated'], 404);

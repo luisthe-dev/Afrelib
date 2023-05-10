@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CreateUserRequest;
 use App\Models\Role;
 use App\Models\User;
+use App\Models\groupChat;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -83,6 +84,38 @@ class UserController extends Controller
         $user->save();
 
         $user->role_name = $role->role_name;
+
+        if ($role->role_name == 'Mentor'){
+            // Adding mentor to group chat 
+            $group_id= base64_encode("admin"."mentor");
+
+            // Adding new mentor to the group chat 
+
+                $gchat= new groupChat;
+                $gchat->team_id = $group_id;
+                $gchat->team_name = "Mentor" . $group_id;
+                $gchat->participant = $request->first_name;
+                $gchat->userId = "Mentor" . rand(0000,9999);
+                $gchat->role= "Mentor";
+                $gchat->save();
+        }
+
+                 // Adding panelist to group chat 
+        if ($role->role_name == 'Panelist'){
+            $panel_id= base64_encode("Panelist");
+
+            // Adding new panelist to the group chat 
+
+                $gchat= new groupChat;
+                $gchat->team_id = $panel_id;
+                $gchat->team_name = "Panelist" . $group_id;
+                $gchat->participant = $request->first_name;
+                $gchat->userId = "Panelist" . rand(0000,9999);
+                $gchat->role= "Panelist";
+                $gchat->save();
+        }
+      
+
 
         return SuccessResponse('User Created Successfully', $user);
     }

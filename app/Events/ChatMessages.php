@@ -31,7 +31,12 @@ class ChatMessages implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new Channel('trades');
+        return ['my-channel'];
+    }
+
+    public function broadcastAs()
+    {
+        return 'my-event';
     }
 
 

@@ -168,7 +168,7 @@ class ChatController extends Controller
      // Creating group chat for panelist 
      public function panelist(Request $request)
      {
-         $panel_id= $request->panel_id . rand(0000,9999);
+         $panel_id= base64_encode("Panelist");
 
          $role= Role::where('role_name', 'Panelist')->get();
 
@@ -235,7 +235,7 @@ class ChatController extends Controller
         $group_id= base64_encode("admin"."mentor");
 
         $admin = admin::all();
-        $user= user::where('role_id','mentor')->get();
+        $user= user::where('role_id','Mentor')->get();
 
         // return response()->json([$user->count()]);
 
@@ -253,7 +253,7 @@ class ChatController extends Controller
 
         }
     }
-        // Adding all panelist to the group chat
+        // Adding all Mentor to the group chat
 
         if($user->count() > 0){
             for($p=0; $p <= $user->count(); $p++)
@@ -272,7 +272,6 @@ class ChatController extends Controller
           return response()->json(['status' => 'Success', 'message' => 'Group chat successfully created for both mentors and admin']);
 
      }
-
 
 
      public function createCohortChat($cohort_id){
@@ -329,7 +328,7 @@ class ChatController extends Controller
 
                     // Getting users details from table and creating chat
                    
-                    $user= User::where('id',$getteamMembersID[$a])->where('role_id', '!=' , $Role[0]->role_id)->get();
+                    $user= User::where('id',$getteamMembersID[$a])->where('role_id', '!=' , "Panelist")->get();
                    
                     // return response()->json([substr($cohort_id, 0, 2)]);
                     $chat= new Chat;

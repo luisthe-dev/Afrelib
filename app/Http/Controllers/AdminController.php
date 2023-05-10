@@ -38,8 +38,6 @@ class AdminController extends Controller
             $gchat->save();
 
     
-
-
         return SuccessResponse('Admin Created Successfully', $newAdmin);
     }
 
