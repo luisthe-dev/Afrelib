@@ -150,8 +150,7 @@ class SubmissionController extends Controller
             if ($action == 'comment') {
                 $newFeedback['comment'] = $request->comment;
             } else if ($action == 'score') {
-                $newFeedback['score'] = $request->score;
-                $newFeedback['evaluated'] = true;
+                return ErrorResponse('Score Can Not Be Updated');
             }
 
             array_push($submissionFeedbacks, $newFeedback);
@@ -174,15 +173,24 @@ class SubmissionController extends Controller
         $submissionFeedbacks = json_decode($submission->panelist_feedback, true);
 
         $feedbacks = array();
+        $average_score = 0;
+        $score_count = 0;
+        $score_total = 0;
 
         foreach ($submissionFeedbacks as $submissionFeedback) {
             $feedbackPanelist = $submissionFeedback['panelist_id'];
             $submissionFeedback['panelist'] = User::where(['id' => $feedbackPanelist])->first();
 
+            $score_count = $score_count + 1;
+            $score_total = $score_total + $submissionFeedback['score'];
+
             array_push($feedbacks, $submissionFeedback);
         }
 
+        if ($score_count != 0 && $score_total != 0) $average_score = $score_total / $score_count;
+
         $submission->panelist_feedback = $feedbacks;
+        $submission->average_score = $average_score;
 
         return SuccessResponse('Submission Fetched Successfully', $submission);
     }
