@@ -9,7 +9,7 @@
         You are getting this mail because you requested a password reset.
         <br />
         Alternatively, you can copy and paste the link below in your browser <a
-            href=''>www.afrelib.com/reset-password</a>
+            href=''>www.(URL).com/reset-password</a>
         <br />
         If you need any assistance with this kindly contact support via <a href=''>support@domain.com</a>
     </p>
