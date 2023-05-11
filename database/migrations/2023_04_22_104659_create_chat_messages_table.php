@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('chatId');
             $table->string('content');
             $table->string('mediaType');
-            $table->string('mediaUrl')->nullable();
+            $table->string('mediaUrl');
             $table->string('senderId');
             $table->string('senderName');
             $table->string('timestamp');

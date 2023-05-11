@@ -8,7 +8,9 @@ use BeyondCode\LaravelWebSockets\Facades\WebSocketsRouter;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 use App\Models\chat;
+use App\Models\groupChat;
 use App\Models\ChatMessages;
+use App\Models\unreadMessage;
 
 
 
@@ -17,6 +19,7 @@ class MessageController extends Controller
     //
     public function sendMessage(Request $request, $chat_id)
     {
+        event(new \App\Events\ChatMessages());
          // Check if the user is authenticated
     // if (!$request->user()) {
     //     return response()->json(['error' => 'You are currently not authenticated'], 404);
@@ -80,9 +83,7 @@ class MessageController extends Controller
         // } 
 
         $rand= $chat_id. rand(0000,9999);
-        if(!$request->mediaUrl){
-            $request->mediaUrl = "No file found";
-        }
+      
 
         $SaveMessage=  new ChatMessages;
         $SaveMessage->messageId= $rand;
@@ -95,6 +96,19 @@ class MessageController extends Controller
         $SaveMessage->timestamp= $request->timestamp;
         $SaveMessage->status= "UnRead";
         $SaveMessage->save();
+
+
+        $chat= chat::where('chatId', $chat_id)->where('userId', '!=', $request->senderId)->get();
+        for($i=0; $i<$chat->count(); $i++){
+            $unreadMessage = new unreadMessage;
+            $unreadMessage->chatId = $chat_id;
+            $unreadMessage->messageId = $rand;
+            $unreadMessage->userId = $chat[$i]->userId;
+            $unreadMessage->username = $chat[$i]->firstName . ' ' .$chat[$i]->lastName;
+            $unreadMessage->status = 'Unread';
+            $unreadMessage->save();
+        }
+      
 
         
         return response()->json([
@@ -140,6 +154,17 @@ class MessageController extends Controller
         }
 
         $message= ChatMessages::where('chatId', $chat_id)->paginate(10);
+
+        $messagestatus= ChatMessages::where('chatId', $chat_id)->where('status', 'UnRead')->get();
+
+        if($messagestatus->count() > 0){
+            for($i=0; $i < $messagestatus->count(); $i++){
+                $messagestatus[$i]->status = "Read";
+                $messagestatus[$i]->save();
+            }
+        
+        }
+
         return response()->json([$message], 200);
     }
 
@@ -155,23 +180,74 @@ class MessageController extends Controller
 
         $messagestatus= ChatMessages::where('chatId', $chat_id)->where('status', 'UnRead')->get();
 
-        if($messagestatus->count() > 0){
-            for($i=0; $i < $messagestatus->count(); $i++){
-                $messagestatus[$i]->status = "Read";
-                $messagestatus[$i]->save();
-            }
-           
-            return response()->json(['Unread Messages' => $messagestatus->count()], 200);
-        }
-        elseif($messagestatus->count() <= 0){
+        return response()->json(['Unread Messages' => $messagestatus->count()], 200);
 
-            return response()->json(['Unread Messages' => 0], 200);
-        }
-        else{
-            return response()->json(['error' => 'Could not process query'], 404);
-        }
+        // if($messagestatus->count() > 0){
+        //     for($i=0; $i < $messagestatus->count(); $i++){
+        //         $messagestatus[$i]->status = "Read";
+        //         $messagestatus[$i]->save();
+        //     }
+           
+        //     return response()->json(['Unread Messages' => $messagestatus->count()], 200);
+        // }
+        // elseif($messagestatus->count() <= 0){
+
+        //     return response()->json(['Unread Messages' => 0], 200);
+        // }
+        // else{
+        //     return response()->json(['error' => 'Could not process query'], 404);
+        // }
         
 
+    }
+
+    public function groupchatMembers($teamId)
+    {
+        $ChatMembers = groupChat::where('team_id',$teamId)->get();
+
+        if($ChatMembers->count() > 0){
+            return response()->json([$ChatMembers], 202);
+        }else{
+            return response()->json(['error' => 'No members found in this group chat'], 404);
+        }
+
+    }
+    public function IndividualunreadMessages($chatId){
+        $unreadMessage= unreadMessage::where('chatId', $chatId)->get();
+
+        if($unreadMessage->count() > 0){
+            return response()->json([$unreadMessage], 202);
+        }
+        else{
+            return response()->json(['Could not find chat Id in unread messages'], 404);
+        }
+        
+    }
+
+    public function readchat($chat_id, $userId)
+    {
+        // Checking chat ID 
+        $chatId= unreadMessage::where('chatId', $chat_id)->get();
+        
+        if($chatId->count() < 0){
+            return response()->json(['Could not find chat ID'], 404);
+        }
+
+        // Checking User ID 
+        $user_Id= unreadMessage::where('userId', $userId)->get();
+        
+        if($user_Id->count() < 0){
+            return response()->json(['Could not find User ID'], 404);
+        }
+
+        // Updating the status of messages
+        $unread = unreadMessage::where('chatId', $chat_id)->where('userId', $userId)->get();
+ 
+        for($i=0; $i < $unread->count(); $i++){
+            $unread[$i]->status = "Read";
+            $unread[$i]->save();
+        }
+    
     }
 
 
