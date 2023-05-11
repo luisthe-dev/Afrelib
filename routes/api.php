@@ -40,7 +40,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('cohort/{cohortId}', [ProjectController::class, 'getCohortProjects']);
 
         Route::prefix('submission')->group(function () {
-            Route::post('{projectId}', [SubmissionController::class, 'createSubmission']);
+            Route::middleware(['ability:Student'])->group(function () {
+                Route::post('{projectId}', [SubmissionController::class, 'createSubmission']);
+            });
             Route::get('cohort/{cohortId}', [SubmissionController::class, 'getCohortSubmissions']);
             Route::get('panelist/{projectId}', [SubmissionController::class, 'getProjectSubmissions']);
             Route::get('single/{submissionId}', [SubmissionController::class, 'getSingleSubmission']);
