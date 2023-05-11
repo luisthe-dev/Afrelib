@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use BeyondCode\LaravelWebSockets\Facades\WebSocketsRouter;
+use App\Events\ChatMessages as ChatMessagess; 
+use App\Events\SendChatMessage;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 use App\Models\chat;
@@ -19,7 +21,8 @@ class MessageController extends Controller
     //
     public function sendMessage(Request $request, $chat_id)
     {
-        event(new \App\Events\ChatMessages());
+        // event(new \App\Events\SendChatMessage());
+        event(new SendChatMessage( $chat_id));
          // Check if the user is authenticated
     // if (!$request->user()) {
     //     return response()->json(['error' => 'You are currently not authenticated'], 404);
@@ -83,6 +86,9 @@ class MessageController extends Controller
         // } 
 
         $rand= $chat_id. rand(0000,9999);
+        if(!$request->mediaUrl){
+            $request->mediaUrl = "No file found";
+        }
       
 
         $SaveMessage=  new ChatMessages;

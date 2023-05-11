@@ -88,8 +88,8 @@ Route::prefix('admin')->group(function () {
     // Getting total number of unread messages 
     Route::get('chat/{chat_id}/unread', [MessageController::class, 'UnreadMessages']);
 
-        // Getting total number of individual unread messages 
-        Route::get('chat/{chatId}/individualUnread', [MessageController::class, 'IndividualunreadMessages']);
+     // Getting total number of individual unread messages 
+    Route::get('chat/{chatId}/individualUnread', [MessageController::class, 'IndividualunreadMessages']);
 
         // Retrieving all memebers of a group chat using teamID
         Route::get('chat/{team_id}/members', [MessageController::class, 'groupchatMembers']);
