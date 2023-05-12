@@ -22,7 +22,6 @@ class MessageController extends Controller
     public function sendMessage(Request $request, $chat_id)
     {
         // event(new \App\Events\SendChatMessage());
-        event(new SendChatMessage( $chat_id));
          // Check if the user is authenticated
     // if (!$request->user()) {
     //     return response()->json(['error' => 'You are currently not authenticated'], 404);
@@ -114,8 +113,8 @@ class MessageController extends Controller
             $unreadMessage->status = 'Unread';
             $unreadMessage->save();
         }
-      
-
+        
+        event(new SendChatMessage( $chat_id));
         
         return response()->json([
             "messageId" => $rand,
@@ -129,7 +128,6 @@ class MessageController extends Controller
             "status" => $SaveMessage->status
 
         ]);
-
         // event(new ChatMessage(["messageId" => $rand,
         // "chatId" => $chat_id,
         // "content" => $request->content,
@@ -170,8 +168,9 @@ class MessageController extends Controller
             }
         
         }
-
+        event(new SendChatMessage( $chat_id));
         return response()->json([$message], 200);
+        
     }
 
     
@@ -187,6 +186,8 @@ class MessageController extends Controller
         $messagestatus= ChatMessages::where('chatId', $chat_id)->where('status', 'UnRead')->get();
 
         return response()->json(['Unread Messages' => $messagestatus->count()], 200);
+
+   
 
         // if($messagestatus->count() > 0){
         //     for($i=0; $i < $messagestatus->count(); $i++){
