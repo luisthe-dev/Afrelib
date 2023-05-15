@@ -17,3 +17,6 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+.history/.env_20230510120528
+.history/.env_20230515110803
+config/websocketss.php
