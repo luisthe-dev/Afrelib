@@ -8,6 +8,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 // use App\WebSocket\MyWebSocketHandler;
 // use BeyondCode\LaravelWebSockets\Facades\WebSocketsRouter;
@@ -97,6 +98,9 @@ Route::prefix('admin')->group(function () {
         // Returning all unread messages back to read 
         Route::get('chat/{chat_id}/user/{userId}/read', [MessageController::class, 'readchat']);
 
+        // Retrieving panelist dashboard 
+        Route::get('dashboard/panelist', [DashboardController::class, 'panelistdashboard']);
+
 
 });
 
@@ -170,9 +174,11 @@ Route::prefix('admin')->group(function () {
         Route::post('admin-chat', [ChatController::class, 'createchat']);
 
         // Automatically adding all users from a cohort to a particular group 
-        Route::POST('cohort/{cohort_id}/add', [ChatController::class, 'createCohortChat']);
+        Route::post('cohort/{cohort_id}/add', [ChatController::class, 'createCohortChat']);
     });
 
+    // Retrieve admin dashboard data 
+    Route::get('dashboard/admin', [DashboardController::class, 'admindashboard']);
     
     });
 
