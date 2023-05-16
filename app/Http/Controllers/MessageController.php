@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use BeyondCode\LaravelWebSockets\Facades\WebSocketsRouter;
-use App\Events\ChatMessages as ChatMessagess; 
+use App\Events\ChatMessages as ChatMessagess;
 use App\Events\SendChatMessage;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
@@ -21,21 +21,20 @@ class MessageController extends Controller
     //
     public function sendMessage(Request $request, $chat_id)
     {
-        
+
         // event(new \App\Events\SendChatMessage());
-         // Check if the user is authenticated
-    // if (!$request->user()) {
-    //     return response()->json(['error' => 'You are currently not authenticated'], 404);
-    // }
+        // Check if the user is authenticated
+        // if (!$request->user()) {
+        //     return response()->json(['error' => 'You are currently not authenticated'], 404);
+        // }
 
-    // Check chat id id it exists 
-    $chat= chat::where('chatId', $chat_id)->get();
-    if($chat->count() <=0)
-    {
-        return response()->json(['error' => 'Chat ID does not exist'], 404);
-    }
+        // Check chat id id it exists
+        $chat = chat::where('chatId', $chat_id)->get();
+        if ($chat->count() <= 0) {
+            return response()->json(['error' => 'Chat ID does not exist'], 404);
+        }
 
-        // Validator 
+        // Validator
         $rules = [
             'content' => 'required',
             'mediaType' => 'required',
@@ -44,7 +43,7 @@ class MessageController extends Controller
             'timestamp' => 'required',
             // Add more required fields here as needed
         ];
-    
+
         $messages = [
             'content.required' => 'Content is required',
             'mediaType.required' => 'Media Type is required',
@@ -53,70 +52,70 @@ class MessageController extends Controller
             'timestamp.required' => 'Timestamp is required',
             // Add more custom error messages here as needed
         ];
-    
+
         $validator = Validator::make($request->all(), $rules, $messages);
-    
+
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 404);
         }
-        
+
 
         // if ($request->mediaType != "text" || $request->mediaType != "emoji") {
-            // Saving image file
-
-            
-            // $validator = Validator::make($request->all(), [
-            //     'mediaUrl' => 'required|image'
-            // ]);
-        
-            // if ($validator->fails()) {
-            //     return response()->json(['error' => $validator->errors()], 422);
-            // }
-            
-        
-            // $imageData = file_get_contents($request->mediaUrl);
-            // $fileName = basename($request->mediaUrl);
-            // Storage::put('fileimages/'.$fileName, $imageData);
-
-            // $file = $request->file('mediaUrl');
-            // $fileName = $file->getClientOriginalName();
-            // $filePath = $file->storeAs('public/images', $fileName);
+        // Saving image file
 
 
-        // } 
+        // $validator = Validator::make($request->all(), [
+        //     'mediaUrl' => 'required|image'
+        // ]);
 
-        $rand= $chat_id. rand(0000,9999);
-        if(!$request->mediaUrl){
+        // if ($validator->fails()) {
+        //     return response()->json(['error' => $validator->errors()], 422);
+        // }
+
+
+        // $imageData = file_get_contents($request->mediaUrl);
+        // $fileName = basename($request->mediaUrl);
+        // Storage::put('fileimages/'.$fileName, $imageData);
+
+        // $file = $request->file('mediaUrl');
+        // $fileName = $file->getClientOriginalName();
+        // $filePath = $file->storeAs('public/images', $fileName);
+
+
+        // }
+
+        $rand = $chat_id . rand(0000, 9999);
+        if (!$request->mediaUrl) {
             $request->mediaUrl = "No file found";
         }
-      
 
-        $SaveMessage=  new ChatMessages;
-        $SaveMessage->messageId= $rand;
-        $SaveMessage->chatId= $chat_id;
-        $SaveMessage->content= $request->content;
-        $SaveMessage->mediaType= $request->mediaType;
-        $SaveMessage->mediaUrl= $request->mediaUrl;
-        $SaveMessage->senderId= $request->senderId;
-        $SaveMessage->senderName= $request->senderName;
-        $SaveMessage->timestamp= $request->timestamp;
-        $SaveMessage->status= "UnRead";
+
+        $SaveMessage =  new ChatMessages;
+        $SaveMessage->messageId = $rand;
+        $SaveMessage->chatId = $chat_id;
+        $SaveMessage->content = $request->content;
+        $SaveMessage->mediaType = $request->mediaType;
+        $SaveMessage->mediaUrl = $request->mediaUrl;
+        $SaveMessage->senderId = $request->senderId;
+        $SaveMessage->senderName = $request->senderName;
+        $SaveMessage->timestamp = $request->timestamp;
+        $SaveMessage->status = "UnRead";
         $SaveMessage->save();
 
 
-        $chat= chat::where('chatId', $chat_id)->where('userId', '!=', $request->senderId)->get();
-        for($i=0; $i<$chat->count(); $i++){
-            $unreadMessage = new unreadMessage;
+        $chat = chat::where('chatId', $chat_id)->where('userId', '!=', $request->senderId)->get();
+        for ($i = 0; $i < $chat->count(); $i++) {
+            $unreadMessage = new unreadmessage;
             $unreadMessage->chatId = $chat_id;
             $unreadMessage->messageId = $rand;
             $unreadMessage->userId = $chat[$i]->userId;
-            $unreadMessage->username = $chat[$i]->firstName . ' ' .$chat[$i]->lastName;
+            $unreadMessage->username = $chat[$i]->firstName . ' ' . $chat[$i]->lastName;
             $unreadMessage->status = 'Unread';
             $unreadMessage->save();
         }
-        
-        event(new SendChatMessage( $chat_id));
-        
+
+        event(new SendChatMessage($chat_id));
+
         return response()->json([
             "messageId" => $rand,
             "chatId" => $chat_id,
@@ -137,65 +136,63 @@ class MessageController extends Controller
         // "senderId" => $request->senderId,
         // "senderName" => $request->senderName,
         // "timestamp" => $request->timestamp]));
-    
+
         // WebSocketsRouter::broadcastToChannel("chat.{$chat_id}", [
         //     'type' => 'message',
         //     'message' => $message,
         // ]);
-    
+
         // return response()->json(['success' => true]);
     }
 
-    public function retrieveMessage($chat_id){
-             // Check if the user is authenticated
-    // if (!$request->user()) {
-    //     return response()->json(['error' => 'You are currently not authenticated'], 404);
-    // }
-        // Check chat id id it exists 
-        $chat= ChatMessages::where('chatId', $chat_id)->get();
-        if($chat->count() <=0)
-        {
+    public function retrieveMessage($chat_id)
+    {
+        // Check if the user is authenticated
+        // if (!$request->user()) {
+        //     return response()->json(['error' => 'You are currently not authenticated'], 404);
+        // }
+        // Check chat id id it exists
+        $chat = ChatMessages::where('chatId', $chat_id)->get();
+        if ($chat->count() <= 0) {
             return response()->json(['error' => 'No message as been sent by this group'], 404);
         }
 
-        $message= ChatMessages::where('chatId', $chat_id)->paginate(10);
+        $message = ChatMessages::where('chatId', $chat_id)->paginate(10);
 
-        $messagestatus= ChatMessages::where('chatId', $chat_id)->where('status', 'UnRead')->get();
+        $messagestatus = ChatMessages::where('chatId', $chat_id)->where('status', 'UnRead')->get();
 
-        if($messagestatus->count() > 0){
-            for($i=0; $i < $messagestatus->count(); $i++){
+        if ($messagestatus->count() > 0) {
+            for ($i = 0; $i < $messagestatus->count(); $i++) {
                 $messagestatus[$i]->status = "Read";
                 $messagestatus[$i]->save();
             }
-        
         }
-        event(new SendChatMessage( $chat_id));
+        event(new SendChatMessage($chat_id));
         return response()->json([$message], 200);
-        
     }
 
-    
+
 
     public function UnreadMessages($chat_id)
     {
-        $chatmessages= ChatMessages::where('chatId', $chat_id)->get();
-        
-        if($chatmessages->count() <= 0 ){
+        $chatmessages = ChatMessages::where('chatId', $chat_id)->get();
+
+        if ($chatmessages->count() <= 0) {
             return response()->json(['error' => 'Chat ID does not exist'], 404);
         }
 
-        $messagestatus= ChatMessages::where('chatId', $chat_id)->where('status', 'UnRead')->get();
+        $messagestatus = ChatMessages::where('chatId', $chat_id)->where('status', 'UnRead')->get();
 
         return response()->json(['Unread Messages' => $messagestatus->count()], 200);
 
-   
+
 
         // if($messagestatus->count() > 0){
         //     for($i=0; $i < $messagestatus->count(); $i++){
         //         $messagestatus[$i]->status = "Read";
         //         $messagestatus[$i]->save();
         //     }
-           
+
         //     return response()->json(['Unread Messages' => $messagestatus->count()], 200);
         // }
         // elseif($messagestatus->count() <= 0){
@@ -205,58 +202,53 @@ class MessageController extends Controller
         // else{
         //     return response()->json(['error' => 'Could not process query'], 404);
         // }
-        
+
 
     }
 
     public function groupchatMembers($chat_id)
     {
-        $ChatMembers = chat::where('chatId',$chat_id)->get();
+        $ChatMembers = chat::where('chatId', $chat_id)->get();
 
-        if($ChatMembers->count() > 0){
+        if ($ChatMembers->count() > 0) {
             return response()->json([$ChatMembers], 202);
-        }else{
+        } else {
             return response()->json(['error' => 'No members found in this group chat'], 404);
         }
-
     }
-    public function IndividualunreadMessages($chatId){
-        $unreadMessage= unreadMessage::where('chatId', $chatId)->get();
+    public function IndividualunreadMessages($chatId)
+    {
+        $unreadMessage = unreadMessage::where('chatId', $chatId)->get();
 
-        if($unreadMessage->count() > 0){
+        if ($unreadMessage->count() > 0) {
             return response()->json([$unreadMessage], 202);
-        }
-        else{
+        } else {
             return response()->json(['Could not find chat Id in unread messages'], 404);
         }
-        
     }
 
     public function readchat($chat_id, $userId)
     {
-        // Checking chat ID 
-        $chatId= unreadMessage::where('chatId', $chat_id)->get();
-        
-        if($chatId->count() < 0){
+        // Checking chat ID
+        $chatId = unreadMessage::where('chatId', $chat_id)->get();
+
+        if ($chatId->count() < 0) {
             return response()->json(['Could not find chat ID'], 404);
         }
 
-        // Checking User ID 
-        $user_Id= unreadMessage::where('userId', $userId)->get();
-        
-        if($user_Id->count() < 0){
+        // Checking User ID
+        $user_Id = unreadMessage::where('userId', $userId)->get();
+
+        if ($user_Id->count() < 0) {
             return response()->json(['Could not find User ID'], 404);
         }
 
         // Updating the status of messages
         $unread = unreadMessage::where('chatId', $chat_id)->where('userId', $userId)->get();
- 
-        for($i=0; $i < $unread->count(); $i++){
+
+        for ($i = 0; $i < $unread->count(); $i++) {
             $unread[$i]->status = "Read";
             $unread[$i]->save();
         }
-    
     }
-
-
 }
