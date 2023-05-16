@@ -149,6 +149,18 @@ class ChatController extends Controller
         ->groupBy('chatId')
         ->get();
 
+        if($unread->count() == 0){
+            return response()->json(["total"=> $groupuser->count(),
+            "per_page" => "10",
+            "current_page" => "1",
+            "last_page" => $groupuser->count(),
+            "data" => [
+                $groupuser,
+                "chatId" => $groupuser[0]->chatId,
+                "unreadmessages" => 0,
+                
+            ]]);
+        }
         // Return the chats as JSON
         // return response()->json($chats);
         // $groupuser->unread= $chats;
