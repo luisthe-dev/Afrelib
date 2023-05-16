@@ -21,6 +21,7 @@ class MessageController extends Controller
     //
     public function sendMessage(Request $request, $chat_id)
     {
+        
         // event(new \App\Events\SendChatMessage());
          // Check if the user is authenticated
     // if (!$request->user()) {
@@ -208,9 +209,9 @@ class MessageController extends Controller
 
     }
 
-    public function groupchatMembers($teamId)
+    public function groupchatMembers($chat_id)
     {
-        $ChatMembers = groupChat::where('team_id',$teamId)->get();
+        $ChatMembers = chat::where('chatId',$chat_id)->get();
 
         if($ChatMembers->count() > 0){
             return response()->json([$ChatMembers], 202);

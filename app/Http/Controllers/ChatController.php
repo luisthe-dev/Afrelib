@@ -34,6 +34,39 @@ class ChatController extends Controller
             $gchat->role= "Member";
             $gchat->save();
 
+
+             $chat= new chat;
+
+            $chat->chatId = $request->team_id;
+
+             $chat->chatName = "Team" . $request->team_id;
+
+             $chat->chatDescription = "Welcome to the Group Chat";
+
+             $chat->chatType = "Team";
+
+               $chat->userId = $request->participants[$i];
+
+                 $user= user::where('id',$chat->userId)->get();
+            
+                 if($user->count() > 0)
+                 {
+                    $chat->firstName = $user[0]->first_name;
+                    $chat->lastName = $user[0]->last_name;
+                    $chat->email = $user[0]->email;
+    
+                 }
+
+                 if($user->count() <= 0)
+                 {
+                    $chat->firstName = "Not found";
+                    $chat->lastName = "Not found";
+                    $chat->email = "Not found";
+    
+                 }
+              
+                $chat->save();
+
         }
         return response()->json(['status' => 'Success', 'message' => 'Group chat created and team members added successfully.']);
 
@@ -102,7 +135,6 @@ class ChatController extends Controller
             $chat->chatDescription = $request->chatDescription;
             $chat->chatType = $request->chatType;
             $chat->userId = $request->userIds[$i];
-            
 
             // return response()->json([$request->userIds[$i]]);
 
@@ -149,6 +181,18 @@ class ChatController extends Controller
         ->groupBy('chatId')
         ->get();
 
+        if($unread->count() == 0){
+            return response()->json(["total"=> $groupuser->count(),
+            "per_page" => "10",
+            "current_page" => "1",
+            "last_page" => $groupuser->count(),
+            "data" => [
+                $groupuser,
+                "chatId" => $groupuser[0]->chatId,
+                "unreadmessages" => 0,
+                
+            ]]);
+        }
         // Return the chats as JSON
         // return response()->json($chats);
         // $groupuser->unread= $chats;
