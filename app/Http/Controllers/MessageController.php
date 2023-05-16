@@ -209,9 +209,9 @@ class MessageController extends Controller
 
     }
 
-    public function groupchatMembers($teamId)
+    public function groupchatMembers($chat_id)
     {
-        $ChatMembers = groupChat::where('team_id',$teamId)->get();
+        $ChatMembers = chat::where('chatId',$chat_id)->get();
 
         if($ChatMembers->count() > 0){
             return response()->json([$ChatMembers], 202);
