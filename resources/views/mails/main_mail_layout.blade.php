@@ -7,12 +7,14 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Comme:wght@100;200;300;400;500;600;700;800;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap');
 
         body {
             padding: 0;
             margin: 0;
             background-color: #F0F0F0;
-            font-family: 'Comme', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            font-family: 'Roboto Condensed', 'Comme', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
         }
 
         .main-container {
@@ -30,7 +32,7 @@
             background-color: #FFFFFF;
             border-radius: 10px;
             width: 50%;
-            padding: 20px;
+            padding: 20px 10px;
             margin: 5px auto;
             margin-bottom: 50px;
             text-align: center;
@@ -39,22 +41,47 @@
         h1 {
             color: #05748a;
             font-size: 2em;
-            width: 75%;
+            width: 80%;
             margin: 10px auto;
         }
 
         p.main-message {
             color: #00425F;
             margin: 3em auto 2%;
-            width: 75%;
+            width: 80%;
             font-size: 1.5em;
-            font-weight: 600;
+            font-weight: 500;
             text-align: left;
+            overflow-wrap: break-word;
         }
 
         p.main-message a {
             color: #0275D8;
             text-decoration: none;
+        }
+
+        ol {
+            color: #00425F;
+            margin: 1em auto 0;
+            width: 80%;
+            font-size: 1.3em;
+            font-weight: 500;
+            text-align: left;
+            overflow-wrap: break-word;
+        }
+
+        ol li {
+            overflow-wrap: break-word;
+            padding: 4px 0;
+        }
+
+        p.quick-message {
+            color: #00425F;
+            margin: .5em auto;
+            width: 80%;
+            font-size: 1em;
+            font-weight: 500;
+            text-align: left;
         }
 
         a.message-button {
@@ -93,6 +120,15 @@
             margin: 50px auto;
         }
 
+        p.best-regards {
+            color: #405c75;
+            font-size: 1em;
+            font-weight: 500;
+            text-align: left;
+            width: 80%;
+            margin: 20px auto 12px;
+        }
+
         @media (max-width: 1200px) {
             .message-container {
                 width: 75%;
@@ -101,7 +137,7 @@
 
         @media (max-width: 750px) {
             .message-container {
-                width: 75%;
+                width: 90%;
             }
         }
     </style>
@@ -112,6 +148,10 @@
         <div class="body-container">
             <div class="message-container">
                 @yield('mail_content')
+                <p class="best-regards">
+                    Best regards,<br />
+                    The Afrelib Team
+                </p>
             </div>
             <p class='help-message'>Need Help? Visit our <a href=''>Help Center</a></p>
             <p class="copy-message">Copyright (&copy;) 2023 Afrelib . All rights reserved. </p>

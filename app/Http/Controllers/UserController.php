@@ -63,6 +63,37 @@ class UserController extends Controller
         return SuccessResponse('Students Fetched Successfully', $returnStudents);
     }
 
+    public function getMentorMentees($mentorId)
+    {
+
+        $studentId = Role::where(['role_name' => 'Student'])->first()->role_id;
+
+        $mentorsId = Role::where(['role_name' => 'Mentor'])->first()->role_id;
+
+        $mentor  = User::where(['id' => $mentorId, 'role_id' => $mentorsId])->first();
+
+        if (!$mentor) return ErrorResponse('Invalid Mentor Id Provided');
+
+        $mentorTeams = Team::where(['team_mentor' => $mentorId, 'is_deleted' => false])->get();
+
+        $mentees = array();
+
+        foreach ($mentorTeams as $mentorTeam) {
+
+            $mentorTeamStudents = json_decode($mentorTeam->team_members, true);
+
+            foreach ($mentorTeamStudents as $mentorTeamStudent) {
+                $student = User::where(['id' => $mentorTeamStudent, 'role_id' => $studentId])->first();
+
+                if (!$student) continue;
+
+                array_push($mentees, $student);
+            }
+        }
+
+        return SuccessResponse('Mentees Fetched Successfully', array('mentor' => $mentor, 'mentorTeams' => $mentorTeams, 'mentees' => $mentees));
+    }
+
     public function disableUser($userId)
     {
         $user = User::find($userId);
@@ -174,8 +205,7 @@ class UserController extends Controller
         try {
             Mail::to($user->email)->send(new SignUpMail($user));
         } catch (Exception $err) {
-            dd($err);
-            return ErrorResponse('Error Sending Mail', $err);
+            return ErrorResponse('Account Created. Error Sending Mail', $err);
         }
 
 

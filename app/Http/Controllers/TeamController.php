@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateTeamRequest;
+use App\Mail\JoinedTeam;
 use App\Models\Cohort;
 use App\Models\Project;
 use App\Models\Team;
 use App\Models\User;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class TeamController extends Controller
 {
@@ -147,6 +150,25 @@ class TeamController extends Controller
 
         $team->students = $studentData;
         $team->mentor = $mentor;
+
+
+
+        foreach ($students as $student) {
+            $single = User::where(['id' => $student, 'role_id' => $studentId])->first();
+            try {
+                Mail::to($single->email)->send(new JoinedTeam($single, $team));
+            } catch (Exception $err) {
+                dd($err);
+                return ErrorResponse('Error Sending Mail', $err);
+            }
+        }
+
+        try {
+            Mail::to($mentor->email)->send(new JoinedTeam($mentor, $team));
+        } catch (Exception $err) {
+            dd($err);
+            return ErrorResponse('Error Sending Mail', $err);
+        }
 
         return SuccessResponse('Team Created Successfully', $team);
     }

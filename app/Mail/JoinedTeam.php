@@ -9,36 +9,36 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class SignUpMail extends Mailable
+class JoinedTeam extends Mailable
 {
     use Queueable, SerializesModels;
 
     protected $User = array(
         'first_name' => '',
-        'last_name' => '',
-        'email' => '',
-        'role_name' => '',
     );
 
-    public function __construct($user)
+    protected $Team = array(
+        'team_name' => ''
+    );
+
+    public function __construct($user, $team)
     {
         $this->User = $user;
+        $this->Team = $team;
     }
-
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Welcome to the AI Challenge Platform',
+            subject: 'Congratulations on Joining Your AI Challenge Team!',
         );
     }
-
 
     public function content(): Content
     {
         return new Content(
-            view: 'mails.signup_mail',
-            with: ['User' => $this->User]
+            view: 'mails.joined_team_mail',
+            with: ['User' => $this->User, 'Team' => $this->Team]
         );
     }
 }

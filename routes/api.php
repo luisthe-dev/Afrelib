@@ -50,6 +50,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         });
     });
 
+    Route::get('/mentees/{mentorId}', [UserController::class, 'getMentorMentees']);
+
     Route::post('upload/{uploadType}', [Controller::class, 'uploadFile']);
 });
 
