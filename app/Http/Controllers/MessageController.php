@@ -12,7 +12,7 @@ use App\Models\User;
 use App\Models\chat;
 use App\Models\groupChat;
 use App\Models\ChatMessages;
-use App\Models\unreadMessage;
+use App\Models\unreadmessage;
 
 
 
@@ -106,7 +106,7 @@ class MessageController extends Controller
 
         $chat= chat::where('chatId', $chat_id)->where('userId', '!=', $request->senderId)->get();
         for($i=0; $i<$chat->count(); $i++){
-            $unreadMessage = new unreadMessage;
+            $unreadMessage = new unreadmessage;
             $unreadMessage->chatId = $chat_id;
             $unreadMessage->messageId = $rand;
             $unreadMessage->userId = $chat[$i]->userId;
