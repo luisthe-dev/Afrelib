@@ -19,7 +19,7 @@ class SendChatMessage implements ShouldBroadcast
      * Create a new event instance.
      */
     public function __construct($chat_id)
-    {
+    { 
         //
         $this->chat_id = $chat_id;
     }
@@ -34,7 +34,7 @@ class SendChatMessage implements ShouldBroadcast
         // return [
         //     new PrivateChannel('channel-name'),
         // ];
-        return new PrivateChannel('chat.'.$this->chat_id);
-        // return new Channel('chat.'.$this->chat_id);
+        // return new PrivateChannel('chat.'.$this->chat_id);
+        return new Channel('chat.'.$this->chat_id);
     }
 }
