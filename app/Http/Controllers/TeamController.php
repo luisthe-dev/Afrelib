@@ -139,15 +139,6 @@ class TeamController extends Controller
 
         if ($cohortId) $this->addTeamToCohort($cohortId, $team->id);
 
-        // $project = new Project([
-        //     'cohort_id' => $cohortId,
-        //     'team_id' => $team->id,
-        //     'project_title' => 'Project 1',
-        //     'project_description' => 'Project Starter Template',
-        // ]);
-
-        // $project->save();
-
         $team->students = $studentData;
         $team->mentor = $mentor;
 

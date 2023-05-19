@@ -174,20 +174,18 @@ class SubmissionController extends Controller
 
         $feedbacks = array();
         $average_score = 0;
-        $score_count = 0;
         $score_total = 0;
 
         foreach ($submissionFeedbacks as $submissionFeedback) {
             $feedbackPanelist = $submissionFeedback['panelist_id'];
             $submissionFeedback['panelist'] = User::where(['id' => $feedbackPanelist])->first();
 
-            $score_count = $score_count + 1;
             $score_total = $score_total + $submissionFeedback['score'];
 
             array_push($feedbacks, $submissionFeedback);
         }
 
-        if ($score_count != 0 && $score_total != 0) $average_score = $score_total / $score_count;
+        if ($score_total != 0) $average_score = $score_total / sizeof($submissionFeedbacks);
 
         $submission->panelist_feedback = $feedbacks;
         $submission->average_score = $average_score;

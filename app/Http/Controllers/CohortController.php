@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateCohortRequest;
 use App\Models\Cohort;
+use App\Models\Project;
+use App\Models\Submission;
 use App\Models\Team;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -41,6 +44,92 @@ class CohortController extends Controller
         }
 
         return $cohorts;
+    }
+
+    public function getTeamsLeaderBoard($cohort_id)
+    {
+
+        $cohort = Cohort::where(['cohort_id' => $cohort_id, 'is_deleted' => false])->first();
+
+        if (!$cohort) return ErrorResponse('Cohort Does Not Exist');
+
+        $cohort_teams = json_decode($cohort->cohort_teams, true);
+
+        $cohort_leaderboard = array();
+
+        foreach ($cohort_teams as $cohort_team) {
+
+            $teamScore = 0;
+            $team = Team::where(['id' => $cohort_team, 'is_deleted' => false])->first();
+
+            if (!$team) continue;
+
+            $team_projects = Project::where(['team_id' => $cohort_team, 'is_deleted' => false])->get();
+
+            foreach ($team_projects as $team_project) {
+                $submissions = Submission::where(['project_id' => $team_project->id])->get();
+                $submissionScore = 0;
+                foreach ($submissions as $submission) {
+                    $panelistFeedbacks = json_decode($submission->panelist_feedback, true);
+                    $feedbackScore = 0;
+                    foreach ($panelistFeedbacks as $panelistFeedback) {
+                        $feedbackScore = $feedbackScore + $panelistFeedback['score'];
+                    }
+                    if ($feedbackScore != 0) $feedbackScore = $feedbackScore / sizeof($panelistFeedbacks);
+                    $submissionScore = $submissionScore + $feedbackScore;
+                }
+                $teamScore = $teamScore + $submissionScore;
+            }
+
+            if ($teamScore != 0) $teamScore = $teamScore / sizeof($team_projects);
+
+            $team->aggregrate_score = $teamScore;
+
+            array_push($cohort_leaderboard, $team);
+        }
+
+        $cohort_leaderboard = collect($cohort_leaderboard)->sortByDesc('aggregrate_score');
+
+        return SuccessResponse('Leaderboard Fetched Successfully', $cohort_leaderboard);
+    }
+
+    public function createCriteria(Request $request, $cohort_id)
+    {
+
+        $request->validate([
+            'criteria_text' => 'required|string'
+        ]);
+
+        $cohort = Cohort::where(['cohort_id' => $cohort_id, 'is_deleted' => false])->first();
+
+        if (!$cohort) return ErrorResponse('Cohort Does Not Exist');
+
+        $criteria = DB::table('evaluation_crit')->where(['cohort_id' => $cohort_id])->first();
+
+        if (!$criteria) {
+            $criteria = DB::table('evaluation_crit')->updateOrInsert([
+                'cohort_id' => $cohort_id,
+                'criteria_text' => $request->criteria_text,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now()
+            ]);
+        } else {
+            DB::table('evaluation_crit')->where(['cohort_id' => $cohort_id])->update([
+                'criteria_text' => $request->criteria_text,
+                'updated_at' => Carbon::now()
+            ]);
+        }
+
+        return SuccessResponse('Criteria Updated Successfully');
+    }
+
+    public function getCriteria($cohort_id)
+    {
+        $criteria = DB::table('evaluation_crit')->where(['cohort_id' => $cohort_id])->first();
+
+        if (!$criteria) return ErrorResponse('Cohort Has No Evaluation Criteria');
+
+        return SuccessResponse('Criteria Fetched Successfully', $criteria);
     }
 
     public function getSingleCohort($cohortId)
@@ -129,7 +218,7 @@ class CohortController extends Controller
 
         $cohort->save();
 
-    
+
         return SuccessResponse('Panelists Updated Successfully');
     }
 
@@ -179,7 +268,7 @@ class CohortController extends Controller
 
     public function createCohort(CreateCohortRequest $request)
     {
-        $mentors = $request->mentorIds; 
+        $mentors = $request->mentorIds;
         $teams = $request->teamIds;
         $panelists = $request->panelistIds;
 

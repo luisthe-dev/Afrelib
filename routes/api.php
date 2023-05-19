@@ -52,7 +52,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('/mentees/{mentorId}', [UserController::class, 'getMentorMentees']);
 
+    Route::get('/leaderboard/{cohort_id}', [CohortController::class, 'getTeamsLeaderBoard']);
+
     Route::post('upload/{uploadType}', [Controller::class, 'uploadFile']);
+
+    Route::get('criteria/{cohort_id}', [CohortController::class, 'getCriteria']);
 });
 
 Route::middleware(['auth:sanctum', 'ability:superiorAdmin'])->group(function () {
@@ -78,6 +82,8 @@ Route::middleware(['auth:sanctum', 'ability:superiorAdmin'])->group(function () 
     Route::delete('team/{teamId}', [TeamController::class, 'deleteTeam']);
 
     Route::post('update', [UpdatesController::class, 'createUpdates']);
+
+    Route::post('criteria/{cohort_id}', [CohortController::class, 'createCriteria']);
 });
 
 Route::get('update', [UpdatesController::class, 'getAllUpdates']);
