@@ -177,8 +177,25 @@ Route::prefix('admin')->group(function () {
         Route::post('cohort/{cohort_id}/add', [ChatController::class, 'createCohortChat']);
     });
 
+    
+    Route::prefix('dashboard')->group(function () {
+ 
     // Retrieve admin dashboard data 
-    Route::get('dashboard/admin', [DashboardController::class, 'admindashboard']);
+    Route::get('admin', [DashboardController::class, 'admindashboard']);
+
+    // Retrieve student dashboard data 
+    Route::get('student', [DashboardController::class, 'studentdashboard']);
+
+    // Retrieve panlist dashbboard data 
+    Route::get('panelist', [DashboardController::class, 'panelistdashboard']);
+
+    // Retrieve mentor dashbboard data 
+    Route::get('mentor', [DashboardController::class, 'mentordashboard']);
+    
+});
+
+ // Sending support data to database 
+ Route::post('support', [ChatController::class, 'support']);
     
     });
 
