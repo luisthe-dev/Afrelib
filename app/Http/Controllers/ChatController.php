@@ -13,6 +13,7 @@ use App\Models\Cohort;
 use App\Models\Team;
 use App\Models\Role;
 use App\Models\unreadMessage;
+use App\Models\support;
 
 
 class ChatController extends Controller
@@ -629,6 +630,27 @@ class ChatController extends Controller
                return response()->json([$lastUserUpload], 200);
 
         }
+
+    }
+
+    public function support(Request $request)
+    {
+        if($request->title = "")
+        {
+            return response()->json(["Title is required"], 202);
+        }
+
+        if($request->description = "")
+        {
+            return response()->json(["Decription is required"], 202);
+        }
+        $support = new support;
+        $support->title = $request->title;
+        $support->description = $request->description;
+        $support->file = $request->file;
+
+         // Return results 
+         return response()->json(["Success" => "Your feedback was successfully received"], 200);
 
     }
  

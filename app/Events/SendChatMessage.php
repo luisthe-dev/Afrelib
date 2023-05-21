@@ -35,6 +35,6 @@ class SendChatMessage implements ShouldBroadcast
         //     new PrivateChannel('channel-name'),
         // ];
         // return new PrivateChannel('chat.'.$this->chat_id);
-        return new Channel('chat.'.$this->chat_id);
+        return new Channel('chat.'.$this->chat_id); 
     }
 }
