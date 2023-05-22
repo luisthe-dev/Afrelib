@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->longText('about_me')->after('password');
-            $table->longText('profile_image')->after('about_me')->default('https://api.dicebear.com/6.x/bottts/svg?seed=Angel');
+            $table->string('profile_image')->after('about_me')->default('https://api.dicebear.com/6.x/bottts/svg?seed=Angel');
         });
     }
 
