@@ -108,7 +108,7 @@ class UserController extends Controller
 
                 $gchat= new groupChat;
                 $gchat->team_id = $panel_id;
-                $gchat->team_name = "Panelist" . rand();
+                $gchat->team_name = "Panelist" . rand(0000,9999);
                 $gchat->participant = $request->first_name;
                 $gchat->userId = "Panelist" . rand(0000,9999);
                 $gchat->role= "Panelist";
