@@ -18,6 +18,29 @@ use Illuminate\Support\Facades\Mail;
 class UserController extends Controller
 {
 
+    public function getActiveAccount(Request $request)
+    {
+        $user = $request->user();
+
+        return SuccessResponse('User Details Fetched', $user);
+    }
+
+    public function updateActiveUser(Request $request)
+    {
+
+        $user = $request->user();
+
+        $User = User::Where(['id' => $user->id])->first();
+
+        if (!$user) ErrorResponse('Invalid User Selected');
+
+        $User->update($request->all());
+
+        $User->save();
+
+        return SuccessResponse('User Updated Successfully');
+    }
+
     public function allUsers()
     {
         $users = User::paginate(25);
