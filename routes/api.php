@@ -175,7 +175,11 @@ Route::prefix('admin')->group(function () {
 
         // Automatically adding all users from a cohort to a particular group 
         Route::post('cohort/{cohort_id}/add', [ChatController::class, 'createCohortChat']);
+       
     });
+
+     // Sending support data to database 
+     Route::get('getsupport', [ChatController::class, 'getsupport']);
 
     
     Route::prefix('dashboard')->group(function () {

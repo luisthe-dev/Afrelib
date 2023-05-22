@@ -6,6 +6,7 @@ use App\Http\Requests\CreateUserRequest;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\groupChat;
+use App\Models\chat;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -98,12 +99,25 @@ class UserController extends Controller
                 $gchat->userId = "Mentor" . rand(0000,9999);
                 $gchat->role= "Mentor";
                 $gchat->save();
+
+
+                $chat= new chat;
+                $chat->chatId = 8888;
+                $chat->chatName = "Admin and Mentor";
+                $chat->chatDescription = "Welcome to Admin and Mentor Group Chat";
+
+                $chat->chatType = "AdminMentor";
+                $chat->userId = "Mentor" . rand(0000,9999);
+                $chat->firstName = $request->first_name;
+                $chat->lastName = $request->last_name;
+                $chat->email = $request->email;
+             
+                $chat->save();
         }
 
                  // Adding panelist to group chat 
         if ($role->role_name == 'Panelist'){
             $panel_id= base64_encode("Panelist");
-
             // Adding new panelist to the group chat 
 
                 $gchat= new groupChat;
@@ -113,6 +127,20 @@ class UserController extends Controller
                 $gchat->userId = "Panelist" . rand(0000,9999);
                 $gchat->role= "Panelist";
                 $gchat->save();
+
+                $chat= new chat;
+                $chat->chatId = 9999;
+                $chat->chatName = "Panelist";
+                $chat->chatDescription = "Welcome to Panelist Group Chat";
+
+                $chat->chatType = "Panelist";
+                $chat->userId = "Panelist" . rand(0000,9999);
+                $chat->firstName = $request->first_name;
+                $chat->lastName = $request->last_name;
+                $chat->email = $request->email;
+             
+                $chat->save();
+
         }
       
 
