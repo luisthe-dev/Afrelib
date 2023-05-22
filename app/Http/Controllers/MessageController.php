@@ -37,7 +37,7 @@ class MessageController extends Controller
 
         // Validator 
         $rules = [
-            'content' => 'required',
+            // 'content' => 'required',
             'mediaType' => 'required',
             'senderId' => 'required',
             'senderName' => 'required',
@@ -46,7 +46,7 @@ class MessageController extends Controller
         ];
     
         $messages = [
-            'content.required' => 'Content is required',
+            // 'content.required' => 'Content is required',
             'mediaType.required' => 'Media Type is required',
             'senderId.required' => 'Sender ID is required',
             'senderName.required' => 'Sender Name is required',
@@ -158,7 +158,7 @@ class MessageController extends Controller
             return response()->json(['error' => 'No message as been sent by this group'], 404);
         }
 
-        $message= ChatMessages::where('chatId', $chat_id)->orderByDesc('created_at')->paginate(20);
+        $message= ChatMessages::where('chatId', $chat_id)->orderByDesc('created_at')->paginate(40);
 
         $messagestatus= ChatMessages::where('chatId', $chat_id)->where('status', 'UnRead')->get();
 
