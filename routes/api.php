@@ -61,6 +61,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('/user', [UserController::class, 'getActiveAccount']);
     Route::put('/user', [UserController::class, 'updateActiveUser']);
+    Route::put('/user/password', [UserController::class, 'updateUserPassword']);
 
     Route::post('chat', [OpenAIController::class, 'requestPrompt']);
 });

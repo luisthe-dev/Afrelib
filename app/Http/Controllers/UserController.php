@@ -83,6 +83,26 @@ class UserController extends Controller
         return SuccessResponse('Students Fetched Successfully', $returnStudents);
     }
 
+    public function updateUserPassword(Request $request)
+    {
+        $request->validate([
+            'old_password' => 'required|string',
+            'new_password' => 'required|string'
+        ]);
+
+        $user = $request->user();
+
+        $password = $user->password;
+
+        if (!Hash::check($request->old_password, $password)) return ErrorResponse('Invalid Password Provided');
+
+        $user->password = Hash::make($request->new_password);
+
+        $user->save();
+
+        return SuccessResponse('User Password Updated Successfully', $user);
+    }
+
     public function getMentorMentees($mentorId)
     {
 
