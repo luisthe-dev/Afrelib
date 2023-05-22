@@ -12,6 +12,7 @@ use App\Http\Controllers\MessageController;
 use App\Http\Controllers\SubmissionController;
 use App\Http\Controllers\UpdatesController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\OpenAIController;
 use Illuminate\Support\Facades\Route;
 // use App\WebSocket\MyWebSocketHandler;
 // use BeyondCode\LaravelWebSockets\Facades\WebSocketsRouter;
@@ -60,6 +61,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('/user', [UserController::class, 'getActiveAccount']);
     Route::put('/user', [UserController::class, 'updateActiveUser']);
+
+    Route::post('chat', [OpenAIController::class, 'requestPrompt']);
 });
 
 Route::middleware(['auth:sanctum', 'ability:superiorAdmin'])->group(function () {
