@@ -114,19 +114,33 @@ class DashboardController extends Controller
         }
 
           // Checking for submission 
-          if($submission->count() <= 0){
-            return response()->json(["No submission have been recorded for this week"], 202);
+        //   if($submission->count() <= 0){
+        //     return response()->json(["No submission have been recorded for this week"], 202);
+        // }
+
+        // // Getting leaderpoint 
+        // $leader_point = DB::table('submissions')->where('submission_week', $weekNumber[0]->week_number)->sum('panelist_feedback');
+
+        $feedbackData = DB::table('submissions')
+    ->where('submission_week', $weekNumber[0]->week_number)
+    ->pluck('panelist_feedback');
+
+        $sum = 0;
+
+        foreach ($feedbackData as $feedback) {
+            $feedbackArray = json_decode($feedback, true); // Assuming the column stores JSON data
+            
+            foreach ($feedbackArray as $item) {
+                $sum += $item['score'];
+            }
         }
 
-        // Getting leaderpoint 
-        $leader_point = DB::table('submissions')->where('submission_week', $weekNumber[0]->week_number)->sum('panelist_feedback');
-        
 
         return response()->json([
             "submission_deadline_date" => $weekNumber[0]->week_end,
             "current_week" => $weekNumber[0]->week_number,
             "total_submissions_made" => $submission->count(),
-            "team_leaderboard_point" => $leader_point
+            "team_leaderboard_point" => $sum
 
         ]);
 
@@ -134,19 +148,85 @@ class DashboardController extends Controller
 
     public function mentordashboard(Request $request)
     {
+        $today = Carbon::today()->toDateString();
+        $weekNumber = DB::table('weekly_deadline')->whereDate('week_start', '<=', $today)
+        ->whereDate('week_end', '>=', $today)
+        ->get();
+
+        // Get the current week
+        $currentWeek = $weekNumber[0]->week_number;
+        $previousWeek = $currentWeek - 1;
 
         // $submissi = DB::table('submissions')->get();
         // $re= json_decode($submissi[0]->panelist_feedback);
         // $sum= $re[0];
+        $submissions = DB::table('submissions')->where('submission_week', $currentWeek)->get(); // Retrieve all submissions from the 'submissions' table
 
-        // return response()->json([$sum]);
+        $results = [];
 
-           $today = Carbon::today()->toDateString();
+        foreach ($submissions as $submission) {
+            $feedbackData = json_decode($submission->panelist_feedback, true); // Assuming the column stores JSON data
+        
+            $sum = 0;
+            foreach ($feedbackData as $item) {
+                $sum += $item['score'];
+            }
+        
+            // Retrieve previous week's submissions
+            $previousSubmissions = DB::table('submissions')->where('submission_week', $previousWeek)->get();
+        
+            $previousTotalPoints = 0;
+            foreach ($previousSubmissions as $previousSubmission) {
+                $previousFeedbackData = json_decode($previousSubmission->panelist_feedback, true);
+        
+                foreach ($previousFeedbackData as $item) {
+                    $previousTotalPoints += $item['score'];
+                }
+            }
+        
+            $result = [
+                'team_id' => 'team' . $submission->project_id,
+                'current_total_points' => $sum,
+                'previous_total_points' => $previousTotalPoints,
+            ];
+        
+            $results[] = $result;
+        }
+        
+        // Sort the results by current_total_points and previous_total_points in descending order
+        usort($results, function ($a, $b) {
+            return $b['current_total_points'] <=> $a['current_total_points'];
+        });
+        
+        // Add current_ranking to the results
+        $currentRanking = 1;
+        foreach ($results as &$result) {
+            $result['current_ranking'] = $currentRanking;
+            $currentRanking++;
+        }
+        
+        // Sort the results by previous_total_points in descending order
+        usort($results, function ($a, $b) {
+            return $b['previous_total_points'] <=> $a['previous_total_points'];
+        });
+        
+        // Add previous_ranking to the results
+        $previousRanking = 1;
+        foreach ($results as &$result) {
+            $result['previous_ranking'] = $previousRanking;
+            $previousRanking++;
+        }
+        
+            // Add previous ranking to the results 
 
-        // Getting sumission deadline date 
-        $weekNumber = DB::table('weekly_deadline')->whereDate('week_start', '<=', $today)
-        ->whereDate('week_end', '>=', $today)
-        ->get();
+            // return response()->json([$results]);
+
+
+
+        // // Getting sumission deadline date 
+        // $weekNumber = DB::table('weekly_deadline')->whereDate('week_start', '<=', $today)
+        // ->whereDate('week_end', '>=', $today)
+        // ->get();
 
         $user = Auth::user(); // Get the authenticated user
         
@@ -157,64 +237,7 @@ class DashboardController extends Controller
         // $mentorsId = Role::where(['role_name' => 'Mentor'])->first()->role_id;
         $mentorTeams = Team::where(['team_mentor' => $mentorId, 'is_deleted' => false])->get();
 
-          // Get the current week
-          $currentWeek = $weekNumber[0]->week_number;
-          $previousWeek = $currentWeek - 1;
-// Fetch submissions from the database
-$submissions = DB::table('submissions')->get();
-
-$results = [];
-
-foreach ($submissions as $submission) {
-    // Decode the JSON values in the panelist_feedback column
-    $feedback = json_decode($submission->panelist_feedback, true);
-
-    // Get the scores for the current week
-    $currentScores = isset($feedback[$currentWeek]) ? $feedback[$currentWeek] : [];
-
-    // Get the scores for the previous week
-    $previousScores = isset($feedback[$previousWeek]) ? $feedback[$previousWeek] : [];
-
-    // Sum up the scores for the current week
-    $currentTotalPoints = array_sum($currentScores);
-
-    // Sum up the scores for the previous week
-    $previousTotalPoints = array_sum($previousScores);
-
-    // Calculate the current ranking
-    $currentRanking = DB::table('submissions AS s1')
-        ->join('submissions AS s2', function ($join) use ($currentWeek) {
-            $join->on('s1.project_id', '=', 's2.project_id')
-                ->where('s2.submission_week', '=', $currentWeek);
-        })
-        ->where('s1.submission_week', '=', $currentWeek)
-        ->groupBy('s1.project_id')
-        ->orderByRaw('SUM(JSON_EXTRACT(s2.panelist_feedback, CONCAT("$.", CAST(' . $currentWeek . ' AS CHAR)))) DESC')
-        ->pluck('s1.project_id')
-        ->search($submission->project_id) + 1;
-
-    // Calculate the previous ranking
-    $previousRanking = DB::table('submissions AS s1')
-        ->join('submissions AS s2', function ($join) use ($previousWeek) {
-            $join->on('s1.project_id', '=', 's2.project_id')
-                ->where('s2.submission_week', '=', $previousWeek);
-        })
-        ->where('s1.submission_week', '=', $previousWeek)
-        ->groupBy('s1.project_id')
-        ->orderByRaw('SUM(JSON_EXTRACT(s2.panelist_feedback, CONCAT("$.", CAST(' . $previousWeek . ' AS CHAR)))) DESC')
-        ->pluck('s1.project_id')
-        ->search($submission->project_id) + 1;
-
-    // Add the results to the array
-    $results[] = [
-        'team_id' => 'team' . rand(),
-        'current_total_points' => $currentTotalPoints,
-        'previous_total_points' => $previousTotalPoints,
-        'current_ranking' => $currentRanking,
-        'previous_ranking' => $previousRanking,
-    ];
-}
-
+    
 
         // tttttt
                     
