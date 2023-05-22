@@ -157,7 +157,7 @@ class MessageController extends Controller
             return response()->json(['error' => 'No message as been sent by this group'], 404);
         }
 
-        $message = ChatMessages::where('chatId', $chat_id)->paginate(10);
+        $message = ChatMessages::where('chatId', $chat_id)->orderByDesc('created_at')->paginate(20);
 
         $messagestatus = ChatMessages::where('chatId', $chat_id)->where('status', 'UnRead')->get();
 
