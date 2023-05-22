@@ -57,6 +57,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('upload/{uploadType}', [Controller::class, 'uploadFile']);
 
     Route::get('criteria/{cohort_id}', [CohortController::class, 'getCriteria']);
+
+    Route::get('/user', [UserController::class, 'getActiveAccount']);
+    Route::put('/user', [UserController::class, 'updateActiveUser']);
 });
 
 Route::middleware(['auth:sanctum', 'ability:superiorAdmin'])->group(function () {

@@ -27,16 +27,13 @@ class UserController extends Controller
 
     public function updateActiveUser(Request $request)
     {
-
         $user = $request->user();
-
-        $User = User::Where(['id' => $user->id])->first();
 
         if (!$user) ErrorResponse('Invalid User Selected');
 
-        $User->update($request->all());
+        $user->update($request->all());
 
-        $User->save();
+        $user->save();
 
         return SuccessResponse('User Updated Successfully');
     }
