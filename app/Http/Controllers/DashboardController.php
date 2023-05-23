@@ -117,6 +117,8 @@ class DashboardController extends Controller
          // Checking for submission deadline date 
          if($weekNumber->isEmpty()){
             $weekset = 0;
+            $deadline = 0;
+                //    return response()->json(["test"]);
         }
 
         if($weekNumber->count() > 0){
@@ -127,9 +129,16 @@ class DashboardController extends Controller
         $submission = DB::table('submissions')->where('submission_week', $weekset)->get();
 
         if($submission->isEmpty()){
+            // return response()->json(["test"]);
             $sub_count = 0;
-            $deadline = $weekNumber[0]->week_end;
-
+            if($deadline == 0)
+            {
+                $deadline = 0;
+            }else{
+                $deadline = $weekNumber[0]->week_end;
+            }
+     
+        
         }
 
         if($submission->count() > 0)
