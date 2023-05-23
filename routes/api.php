@@ -105,17 +105,18 @@ Route::prefix('admin')->group(function () {
         Route::get('viewmessages/{user_id}', [ChatController::class, 'view']);
 
          // Sending support data to database 
- Route::post('support', [ChatController::class, 'support']);
+         Route::post('support', [ChatController::class, 'support']);
 
- 
-    // Retrieve student dashboard data 
-    Route::get('student', [DashboardController::class, 'studentdashboard']);
+                // Retrieve student dashboard data 
+        Route::get('dashboard/student', [DashboardController::class, 'studentdashboard']);
 
-    // Retrieve panlist dashbboard data 
-    Route::get('panelist', [DashboardController::class, 'panelistdashboard']);
+        // Retrieve panlist dashbboard data 
+        Route::get('dashboard/panelist', [DashboardController::class, 'panelistdashboard']);
 
-    // Retrieve mentor dashbboard data 
-    Route::get('mentor', [DashboardController::class, 'mentordashboard']);
+        // Retrieve mentor dashbboard data 
+        Route::get('dashboard/mentor', [DashboardController::class, 'mentordashboard']);
+
+
 
 });
 
