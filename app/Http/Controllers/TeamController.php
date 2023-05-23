@@ -18,7 +18,7 @@ class TeamController extends Controller
 
     public function getAllTeams()
     {
-        $teams = Team::where(['is_deleted' => false])->paginate(25);
+        $teams = Team::where(['is_deleted' => false])->orderByDesc('created_at')->paginate(50);
 
         $mentorId = DB::table('roles')->where(['role_name' => 'Mentor'])->first()->role_id;
 
@@ -196,7 +196,7 @@ class TeamController extends Controller
 
         if (!$team) return ErrorResponse('Team Does Not Exist');
 
-        $teamExist = Cohort::where([['cohort_teams', 'like', '%' . $team_id . '%']])->get();
+        $teamExist = Cohort::where([['cohort_teams', 'like', '%' . $team_id . '%']])->orderByDesc('created_at')->get();
 
         foreach ($teamExist as $single) {
             $singleTeams = json_decode($single->cohort_teams, true);
@@ -218,7 +218,7 @@ class TeamController extends Controller
     {
         $team = Team::where(['id' => $teamId, 'is_deleted' => false])->first();
 
-        $cohorts = Cohort::where([['cohort_teams', 'like', '%' . $teamId . '%'], 'is_deleted' => false])->get();
+        $cohorts = Cohort::where([['cohort_teams', 'like', '%' . $teamId . '%'], 'is_deleted' => false])->orderByDesc('created_at')->get();
 
         foreach ($cohorts as $cohort) {
 

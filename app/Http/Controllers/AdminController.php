@@ -14,7 +14,7 @@ class AdminController extends Controller
 
     public function getAllAdmins()
     {
-        return Admin::all();
+        return Admin::orderByDesc('created_at')->get();
     }
 
     public function createAdmin(CreateAdminRequest $request)
@@ -26,23 +26,23 @@ class AdminController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password)
         ]);
- 
+
         $newAdmin->save();
 
-        // Adding admin to group chat 
-        $group_id= base64_encode("admin"."mentor");
+        // Adding admin to group chat
+        $group_id = base64_encode("admin" . "mentor");
 
-        // Adding new admin to the group chat 
-       
-            $gchat= new groupChat;
-            $gchat->team_id = $group_id;
-            $gchat->team_name = "Admin" . $group_id;
-            $gchat->participant = $request->first_name;
-            $gchat->userId = "Admin" . rand(0000,9999);
-            $gchat->role= "Admin";
-            $gchat->save();
+        // Adding new admin to the group chat
 
-    
+        $gchat = new groupChat;
+        $gchat->team_id = $group_id;
+        $gchat->team_name = "Admin" . $group_id;
+        $gchat->participant = $request->first_name;
+        $gchat->userId = "Admin" . rand(0000, 9999);
+        $gchat->role = "Admin";
+        $gchat->save();
+
+
         return SuccessResponse('Admin Created Successfully', $newAdmin);
     }
 

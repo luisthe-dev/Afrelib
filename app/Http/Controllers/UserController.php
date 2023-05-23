@@ -40,7 +40,7 @@ class UserController extends Controller
 
     public function allUsers()
     {
-        $users = User::paginate(25);
+        $users = User::orderByDesc('created_at')->paginate(50);
 
         foreach ($users as $user) {
             $user_role = $user->role_id;
@@ -65,7 +65,7 @@ class UserController extends Controller
         User::where(['role_id' => $studentId])->chunkById(200, function ($students) use (&$returnStudents) {
 
             foreach ($students as $student) {
-                $teams = Team::where([['team_members', 'like', '%' . $student->id . '%']])->get();
+                $teams = Team::where([['team_members', 'like', '%' . $student->id . '%']])->orderByDesc('created_at')->get();
 
                 if (sizeof($teams) == 0) array_push($returnStudents, $student);
 
@@ -114,7 +114,7 @@ class UserController extends Controller
 
         if (!$mentor) return ErrorResponse('Invalid Mentor Id Provided');
 
-        $mentorTeams = Team::where(['team_mentor' => $mentorId, 'is_deleted' => false])->get();
+        $mentorTeams = Team::where(['team_mentor' => $mentorId, 'is_deleted' => false])->orderByDesc('created_at')->get();
 
         $mentees = array();
 
@@ -160,7 +160,7 @@ class UserController extends Controller
 
     public function roleUsers($role_id)
     {
-        $users = User::where(['role_id' => $role_id])->paginate(25);
+        $users = User::where(['role_id' => $role_id])->orderByDesc('created_at')->paginate(50);
 
         foreach ($users as $user) {
             $user_role = $user->role_id;
@@ -271,7 +271,7 @@ class UserController extends Controller
 
         if (!$role) return ErrorResponse('Error Confirming User Identity');
 
-        $teams = Team::where([['team_members', 'like', '%' . $User->id . '%']])->get();
+        $teams = Team::where([['team_members', 'like', '%' . $User->id . '%']])->orderByDesc('created_at')->get();
 
         $userTeam = null;
 
@@ -284,7 +284,7 @@ class UserController extends Controller
         $userCohort = null;
 
         if ($userTeam) {
-            $cohorts = Cohort::where([['cohort_teams', 'like', '%' . $userTeam->id . '%']])->get();
+            $cohorts = Cohort::where([['cohort_teams', 'like', '%' . $userTeam->id . '%']])->orderByDesc('created_at')->get();
 
             foreach ($cohorts as $cohort) {
                 $cohortTeams = json_decode($cohort->cohort_teams, true);
@@ -294,7 +294,7 @@ class UserController extends Controller
         }
 
         if (!$userTeam) {
-            $teams = Team::where(['team_mentor' =>  $User->id])->get();
+            $teams = Team::where(['team_mentor' =>  $User->id])->orderByDesc('created_at')->get();
             $userTeam = $teams;
         }
 

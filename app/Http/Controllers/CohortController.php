@@ -17,7 +17,7 @@ class CohortController extends Controller
 
     public function getAllCohorts()
     {
-        $cohorts = Cohort::where(['is_deleted' => false])->paginate(25);
+        $cohorts = Cohort::where(['is_deleted' => false])->orderByDesc('created_at')->paginate(50);
 
         foreach ($cohorts as $cohort) {
 
@@ -64,10 +64,10 @@ class CohortController extends Controller
 
             if (!$team) continue;
 
-            $team_projects = Project::where(['team_id' => $cohort_team, 'is_deleted' => false])->get();
+            $team_projects = Project::where(['team_id' => $cohort_team, 'is_deleted' => false])->orderByDesc('created_at')->get();
 
             foreach ($team_projects as $team_project) {
-                $submissions = Submission::where(['project_id' => $team_project->id])->get();
+                $submissions = Submission::where(['project_id' => $team_project->id])->orderByDesc('created_at')->get();
                 $submissionScore = 0;
                 foreach ($submissions as $submission) {
                     $panelistFeedbacks = json_decode($submission->panelist_feedback, true);

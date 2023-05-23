@@ -16,10 +16,10 @@ class ProjectController extends Controller
 
     public function getAllProjects()
     {
-        $projects = Project::where(['is_deleted' => false])->paginate(25);
+        $projects = Project::where(['is_deleted' => false])->orderByDesc('created_at')->paginate(50);
 
         foreach ($projects as $project) {
-            $submissions = Submission::where(['project_id' => $project->id])->get();
+            $submissions = Submission::where(['project_id' => $project->id])->orderByDesc('created_at')->get();
 
             $project->submissions = $submissions;
 
@@ -95,10 +95,10 @@ class ProjectController extends Controller
     public function getTeamProjects($teamId)
     {
 
-        $projects = Project::where(['team_id' => $teamId, 'is_deleted' => false])->get();
+        $projects = Project::where(['team_id' => $teamId, 'is_deleted' => false])->orderByDesc('created_at')->get();
 
         foreach ($projects as $project) {
-            $submissions = Submission::where(['project_id' => $project->id])->get();
+            $submissions = Submission::where(['project_id' => $project->id])->orderByDesc('created_at')->get();
 
             $project->submissions = $submissions;
         }
@@ -145,7 +145,7 @@ class ProjectController extends Controller
 
             if (!$team) return ErrorResponse('Team Does Not Exist');
 
-            $projects = Project::where(['team_id' => $teamId, 'is_deleted' => false])->get();
+            $projects = Project::where(['team_id' => $teamId, 'is_deleted' => false])->orderByDesc('created_at')->get();
 
             foreach ($projects as $project) {
                 $submissions = Submission::where(['project_id' => $project->id])->get();
@@ -191,7 +191,7 @@ class ProjectController extends Controller
 
         $panelistProjects = array();
 
-        $cohorts = Cohort::where([['cohort_panelists', 'like', '%' . $panelist->id . '%']])->get();
+        $cohorts = Cohort::where([['cohort_panelists', 'like', '%' . $panelist->id . '%']])->orderByDesc('created_at')->get();
 
         foreach ($cohorts as $cohort) {
 
@@ -199,12 +199,12 @@ class ProjectController extends Controller
 
             if (!in_array($panelist->id, $cohortPanelists)) continue;
 
-            $cohortProjects = Project::where(['cohort_id' => $cohort->cohort_id, 'is_deleted' => false])->get();
+            $cohortProjects = Project::where(['cohort_id' => $cohort->cohort_id, 'is_deleted' => false])->orderByDesc('created_at')->get();
 
             if (sizeof($cohortProjects) < 1) continue;
 
             foreach ($cohortProjects as $cohortProject) {
-                $projectSubmissions = Submission::where(['project_id' => $cohortProject->id])->get();
+                $projectSubmissions = Submission::where(['project_id' => $cohortProject->id])->orderByDesc('created_at')->get();
                 if (sizeof($projectSubmissions) < 1) continue;
                 $cohortProject->submissions = $projectSubmissions;
             }

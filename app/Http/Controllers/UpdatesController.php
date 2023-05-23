@@ -24,6 +24,6 @@ class UpdatesController extends Controller
 
     public function getAllUpdates()
     {
-        return Updates::paginate(25);
+        return Updates::orderByDesc('created_at')->paginate(50);
     }
 }

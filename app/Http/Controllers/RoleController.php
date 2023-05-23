@@ -10,7 +10,7 @@ class RoleController extends Controller
 
     public function getRoles()
     {
-        return Role::all();
+        return Role::orderByDesc('created_at')->get();
     }
 
     public function createRole(Request $request)

@@ -74,7 +74,7 @@ class SubmissionController extends Controller
 
         if (!in_array($panelist->id, $cohortPanelists)) return ErrorResponse('Panelist Can Not Access Project');
 
-        $projectSubmissions = Submission::where(['project_id' => $projectId])->get();
+        $projectSubmissions = Submission::where(['project_id' => $projectId])->orderByDesc('created_at')->get();
 
         $evaluatedSubmissions = array();
         $nonevaluatedSubmissions = array();
@@ -200,7 +200,7 @@ class SubmissionController extends Controller
 
         if (!$cohort) return ErrorResponse('Cohort Does Not Exist');
 
-        $projects = Project::where(['cohort_id' => $cohortId])->get();
+        $projects = Project::where(['cohort_id' => $cohortId])->orderByDesc('created_at')->get();
 
         $week1 = array();
         $week2 = array();
@@ -211,7 +211,7 @@ class SubmissionController extends Controller
         $week7 = array();
 
         foreach ($projects as $project) {
-            $submissions = Submission::where(['project_id' => $project->id])->get();
+            $submissions = Submission::where(['project_id' => $project->id])->orderByDesc('created_at')->get();
 
             if (sizeof($submissions) < 1) continue;
 
