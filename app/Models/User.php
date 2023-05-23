@@ -20,6 +20,8 @@ class User extends Authenticatable
         'school_name',
         'leadership_points',
         'badges',
+        'about_me',
+        'profile_image',
         'password',
         'status',
     ];
