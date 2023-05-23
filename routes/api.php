@@ -293,22 +293,22 @@ Route::middleware(['auth:sanctum', 'ability:superiorAdmin'])->group(function () 
         Route::post('cohort/{cohort_id}/add', [ChatController::class, 'createCohortChat']);
     });
 
-
-    Route::prefix('dashboard')->group(function () {
-
-        // Retrieve admin dashboard data
-        Route::get('admin', [DashboardController::class, 'admindashboard']);
-
-        // Retrieve student dashboard data
-        Route::get('student', [DashboardController::class, 'studentdashboard']);
-
-        // Retrieve panlist dashbboard data
-        Route::get('panelist', [DashboardController::class, 'panelistdashboard']);
-
-        // Retrieve mentor dashbboard data
-        Route::get('mentor', [DashboardController::class, 'mentordashboard']);
-    });
-
     // Sending support data to database
     Route::post('support', [ChatController::class, 'support']);
+});
+
+
+Route::prefix('dashboard')->group(function () {
+
+    // Retrieve admin dashboard data
+    Route::middleware(['auth:sanctum', 'ability:superiorAdmin'])->get('admin', [DashboardController::class, 'admindashboard']);
+
+    // Retrieve student dashboard data
+    Route::middleware(['auth:sanctum', 'ability:Student'])->get('student', [DashboardController::class, 'studentdashboard']);
+
+    // Retrieve panlist dashbboard data
+    Route::middleware(['auth:sanctum', 'ability:Panelist'])->get('panelist', [DashboardController::class, 'panelistdashboard']);
+
+    // Retrieve mentor dashbboard data
+    Route::middleware(['auth:sanctum', 'ability:Mentor'])->get('mentor', [DashboardController::class, 'mentordashboard']);
 });

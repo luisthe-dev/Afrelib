@@ -86,8 +86,8 @@ class UserController extends Controller
     public function updateUserPassword(Request $request)
     {
         $request->validate([
-            'old_password' => 'required|string',
-            'new_password' => 'required|string'
+            'old_password' => 'required|string|min:6',
+            'new_password' => 'required|string|min:6'
         ]);
 
         $user = $request->user();
