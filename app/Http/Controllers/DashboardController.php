@@ -127,6 +127,7 @@ class DashboardController extends Controller
 
         if ($weekNumber->count() > 0) {
             $weekset = $weekNumber[0]->week_number;
+            $deadline = $weekNumber[0]->week_end;
         }
         // return response()->json([$weekNumber[0]->week_number]);
 
@@ -240,13 +241,25 @@ class DashboardController extends Controller
             // $mentorsId = Role::where(['role_name' => 'Mentor'])->first()->role_id;
             $mentorTeams = Team::where(['team_mentor' => $mentorId, 'is_deleted' => false])->get();
 
-            return response()->json([
-                "submission_deadline_date" => 0,
-                "current_week" => 0,
-                "num_mentees" => $mentorTeams->count(),
-                "team_points" => 0
+            if ($currentWeek == "") {
+                return response()->json([
+                    "submission_deadline_date" => 0,
+                    "current_week" => 0,
+                    "num_mentees" => $mentorTeams->count(),
+                    "team_points" => 0
 
-            ]);
+                ]);
+            }
+
+            if ($currentWeek != "") {
+                return response()->json([
+                    "submission_deadline_date" => $weekNumber[0]->week_end,
+                    "current_week" => 0,
+                    "num_mentees" => $mentorTeams->count(),
+                    "team_points" => 0
+
+                ]);
+            }
         } else {
             $results = [];
 
