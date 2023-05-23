@@ -64,9 +64,10 @@ class MessageController extends Controller
         // Saving image file
 
 
-        // $validator = Validator::make($request->all(), [
-        //     'mediaUrl' => 'required|image'
-        // ]);
+        // }
+        if ($request->content == "") {
+            $request->content = "No content found";
+        }
 
         // if ($validator->fails()) {
         //     return response()->json(['error' => $validator->errors()], 422);
@@ -153,11 +154,30 @@ class MessageController extends Controller
         // }
         // Check chat id id it exists
         $chat = ChatMessages::where('chatId', $chat_id)->get();
+        $chatdecrip = chat::where('chatId', $chat_id)->get();
+        // $lastmessage= ChatMessages::where('chatId', $chat_id)->last();
         if ($chat->count() <= 0) {
             return response()->json(['error' => 'No message as been sent by this group'], 404);
         }
 
-        $message = ChatMessages::where('chatId', $chat_id)->orderByDesc('created_at')->paginate(40);
+        $messages = ChatMessages::where('chatId', $chat_id)
+            ->orderByDesc('created_at')
+            ->paginate(40);
+
+        $combinedResults = [];
+
+        foreach ($messages as $message) {
+            $sender = User::find($message->senderId);
+
+            if ($sender) {
+                $combinedResults[] = [
+                    'message' => $message,
+                    'profile_image' => $sender->profile_image,
+                ];
+            }
+        }
+
+        // return response()->json([$user_detail]);
 
         $messagestatus = ChatMessages::where('chatId', $chat_id)->where('status', 'UnRead')->get();
 
@@ -167,8 +187,12 @@ class MessageController extends Controller
                 $messagestatus[$i]->save();
             }
         }
+        $lastMessage = ChatMessages::where('chatId', $chat_id)
+            ->orderByDesc('created_at')
+            ->value('content');
+
         event(new SendChatMessage($chat_id));
-        return response()->json([$message], 200);
+        return response()->json(["Last Message of chat" => $lastMessage, "Chat Description" => $chatdecrip[0]->chatDescription, "Messages" => [$combinedResults]],  200);
     }
 
 

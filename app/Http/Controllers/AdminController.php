@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CreateAdminRequest;
 use App\Models\Admin;
 use App\Models\groupChat;
+use App\Models\chat;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -41,6 +42,20 @@ class AdminController extends Controller
         $gchat->userId = "Admin" . rand(0000, 9999);
         $gchat->role = "Admin";
         $gchat->save();
+
+
+        $chat = new chat;
+        $chat->chatId = 8888;
+        $chat->chatName = "Admin and Mentor";
+        $chat->chatDescription = "Welcome to Admin and Mentor Group Chat";
+
+        $chat->chatType = "AdminMentor";
+        $chat->userId = "Admin" . rand(0000, 9999);
+        $chat->firstName = $request->first_name;
+        $chat->lastName = $request->last_name;
+        $chat->email = $request->email;
+
+        $chat->save();
 
 
         return SuccessResponse('Admin Created Successfully', $newAdmin);
