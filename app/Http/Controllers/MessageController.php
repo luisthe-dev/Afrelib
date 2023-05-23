@@ -195,7 +195,7 @@ class MessageController extends Controller
         ->orderByDesc('created_at')
         ->value('content');
 
-        // event(new SendChatMessage( $chat_id));
+        event(new SendChatMessage( $chat_id));
         return response()->json(["Last Message of chat" => $lastMessage, "Chat Description" => $chatdecrip[0]->chatDescription, "Messages" => [$combinedResults]],  200);
         
     }

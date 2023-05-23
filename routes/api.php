@@ -99,8 +99,23 @@ Route::prefix('admin')->group(function () {
         Route::get('chat/{chat_id}/user/{userId}/read', [MessageController::class, 'readchat']);
 
         // Retrieving panelist dashboard 
-        Route::get('dashboard/panelist', [DashboardController::class, 'panelistdashboard']);
+        // Route::get('dashboard/panelist', [DashboardController::class, 'panelistdashboard']);
 
+        // Retrieving unread messages 
+        Route::get('viewmessages/{user_id}', [ChatController::class, 'view']);
+
+         // Sending support data to database 
+ Route::post('support', [ChatController::class, 'support']);
+
+ 
+    // Retrieve student dashboard data 
+    Route::get('student', [DashboardController::class, 'studentdashboard']);
+
+    // Retrieve panlist dashbboard data 
+    Route::get('panelist', [DashboardController::class, 'panelistdashboard']);
+
+    // Retrieve mentor dashbboard data 
+    Route::get('mentor', [DashboardController::class, 'mentordashboard']);
 
 });
 
@@ -181,25 +196,19 @@ Route::prefix('admin')->group(function () {
      // Sending support data to database 
      Route::get('getsupport', [ChatController::class, 'getsupport']);
 
+       // Updating support data to database 
+  Route::patch('support/{id}', [ChatController::class, 'updatesupport']);
     
     Route::prefix('dashboard')->group(function () {
  
     // Retrieve admin dashboard data 
     Route::get('admin', [DashboardController::class, 'admindashboard']);
 
-    // Retrieve student dashboard data 
-    Route::get('student', [DashboardController::class, 'studentdashboard']);
-
-    // Retrieve panlist dashbboard data 
-    Route::get('panelist', [DashboardController::class, 'panelistdashboard']);
-
-    // Retrieve mentor dashbboard data 
-    Route::get('mentor', [DashboardController::class, 'mentordashboard']);
     
 });
 
- // Sending support data to database 
- Route::post('support', [ChatController::class, 'support']);
+
+
     
     });
 

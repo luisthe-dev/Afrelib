@@ -26,10 +26,23 @@ class ChatController extends Controller
         $team_id= $request->team_id;
         $no_of_participant= count($request->participants);
 
+        $team_name= Team::where('team_id', $team_id)->get();
+
+        if($team_name->count() <= 0)
+        {
+            $name_of_team = "Team" . $request->team_id;
+        }
+
+        if($team_name->count() > 0)
+        {
+            $name_of_team = $team_name[0]->team_name;
+        }
+
+
         for($i=0; $i<$no_of_participant; $i++){
             $gchat= new groupChat;
             $gchat->team_id = $request->team_id;
-            $gchat->team_name = "Team" . $request->team_id;
+            $gchat->team_name = $name_of_team;
             $gchat->participant = $request->participants[$i];
             $gchat->userId = "User" . $i+1;
             $gchat->role= "Member";
@@ -40,7 +53,7 @@ class ChatController extends Controller
 
             $chat->chatId = $request->team_id;
 
-             $chat->chatName = "Team" . $request->team_id;
+             $chat->chatName = $name_of_team;
 
              $chat->chatDescription = "Welcome to the Group Chat";
 
@@ -168,47 +181,60 @@ class ChatController extends Controller
         //     'password' => 'required|string'
         // ]);
 
-        $groupuser= chat::where('userId', $user_id)->select('chatId','chatName','chatType','userId','firstName')->paginate(10);
+        $profile_image= User::where('id',$user_id)->get();
+
+        if($profile_image->count() <= 0)
+        {
+            $profile_image_url= "No Profile Image Found";
+        }
+
+        if($profile_image->count() > 0)
+        {
+            $profile_image_url= $profile_image[0]->profile_image;
+        }
+
+        $groupuser= chat::where('userId', $user_id)->select('chatId','chatName','chatType','userId','firstName')->paginate(40);
 
         if($groupuser->count() <= 0 ){
             return response()->json(['Status' => 'failed', 'message' => 'User does not exist']);
         }
 
-        // Getting all unread messages 
-       // Get the chats with the count of user IDs where status is unread
-        $unread = DB::table('unreadmessages')
-        ->select('chatId', DB::raw('COUNT(userId) as unreadmessages'))->where('userId', $user_id)
-        ->where('status', 'unread')
-        ->groupBy('chatId')
-        ->get();
-
-        if($unread->count() == 0){
-            return response()->json(["total"=> $groupuser->count(),
-            "per_page" => "10",
-            "current_page" => "1",
-            "last_page" => $groupuser->count(),
-            "data" => [
-                $groupuser,
-                "chatId" => $groupuser[0]->chatId,
-                "unreadmessages" => 0,
-                
-            ]]);
-        }
+      
         
         // Return the chats as JSON
         // return response()->json($chats);
         // $groupuser->unread= $chats;
 
         return response()->json(["total"=> $groupuser->count(),
-                                "per_page" => "10",
+                                "Profile Image" => $profile_image_url,
+                                "per_page" => "40",
                                 "current_page" => "1",
                                 "last_page" => $groupuser->count(),
                                 "data" => [
-                                    $groupuser,
-                                    $unread
+                                    $groupuser
                                     
                                 ]]);
             }
+
+
+        // Getting unread messages
+        public function view($user_id){
+  // Getting all unread messages 
+       // Get the chats with the count of user IDs where status is unread
+       $unread = DB::table('unreadmessages')
+       ->select('chatId', DB::raw('COUNT(userId) as unreadmessages'))->where('userId', $user_id)
+       ->where('status', 'unread')
+       ->groupBy('chatId')
+       ->get();
+
+       if($unread->count() == 0){
+           return response()->json(["data" => [
+               "unreadmessages" => 0 ]]);
+       }
+
+       return response()->json([$unread]);
+
+        } 
     
 
      // Creating group chat for panelist 
@@ -709,6 +735,7 @@ class ChatController extends Controller
         $support->title = $request->title;
         $support->description = $request->description;
         $support->file = $request->file;
+        $support->status = "Opened";
 
         $support->save();
 
@@ -721,6 +748,18 @@ class ChatController extends Controller
     {
         $support = support::get();
         return response()->json([$support]);
+    }
+
+    public function updatesupport($id)
+    {
+        $support = support::find($id);
+        $support->status = "Closed";
+        $support->save();
+
+           // Return results 
+           return response()->json(["Success" => "Status updated successfully"], 200);
+
+
     }
  
 }
