@@ -37,8 +37,6 @@
                 href='http://airmail.calendar/2023-05-24%2012:00:00%20BST'>May 24th, 2023</a> </li>
     </ol>
     <p class="main-message">
-        <br />
-        <br />
         Rest assured, we will be in touch with further details and to address any outstanding questions
         you may have.
         <br />
