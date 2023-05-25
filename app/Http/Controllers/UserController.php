@@ -198,7 +198,8 @@ class UserController extends Controller
             'email' => $request->email,
             'date_of_birth' => $request->date_of_birth,
             'password' => Hash::make($request->last_name),
-            'role_id' => $role->role_id
+            'role_id' => $role->role_id,
+            'about_me' => ''
         ]);
 
         if ($role->role_name == 'Student') {
