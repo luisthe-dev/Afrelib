@@ -173,10 +173,11 @@ class MessageController extends Controller
         $sender = User::find($message->senderId);
     
         if ($sender) {
-            $combinedResults[] = [
-                'message' => $message,
-                'profile_image' => $sender->profile_image,
-            ];
+            $combinedResults[] = array_merge($message->toArray(), ['profile_image' => $sender->profile_image]);
+            // $combinedResults[] = [
+            //     'message' => $message,
+            //     'profile_image' => $sender->profile_image,
+            // ];
         }
     }
     
@@ -195,8 +196,8 @@ class MessageController extends Controller
         ->orderByDesc('created_at')
         ->value('content');
 
-        event(new SendChatMessage( $chat_id));
-        return response()->json(["Last Message of chat" => $lastMessage, "Chat Description" => $chatdecrip[0]->chatDescription, "Messages" => [$combinedResults]],  200);
+        // event(new SendChatMessage( $chat_id));
+        return response()->json(["Chat Description" => $chatdecrip[0]->chatDescription, "Messages" => $combinedResults],  200);
         
     }
 
