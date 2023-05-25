@@ -170,29 +170,30 @@ class MessageController extends Controller
             $sender = User::find($message->senderId);
 
             if ($sender) {
-                $combinedResults[] = [
-                    'message' => $message,
-                    'profile_image' => $sender->profile_image,
-                ];
+                $combinedResults[] = array_merge($message->toArray(), ['profile_image' => $sender->profile_image]);
+                // $combinedResults[] = [
+                //     'message' => $message,
+                //     'profile_image' => $sender->profile_image,
+                // ];
             }
+
+            // return response()->json([$user_detail]);
+
+            $messagestatus = ChatMessages::where('chatId', $chat_id)->where('status', 'UnRead')->get();
+
+            if ($messagestatus->count() > 0) {
+                for ($i = 0; $i < $messagestatus->count(); $i++) {
+                    $messagestatus[$i]->status = "Read";
+                    $messagestatus[$i]->save();
+                }
+            }
+            $lastMessage = ChatMessages::where('chatId', $chat_id)
+                ->orderByDesc('created_at')
+                ->value('content');
         }
 
-        // return response()->json([$user_detail]);
-
-        $messagestatus = ChatMessages::where('chatId', $chat_id)->where('status', 'UnRead')->get();
-
-        if ($messagestatus->count() > 0) {
-            for ($i = 0; $i < $messagestatus->count(); $i++) {
-                $messagestatus[$i]->status = "Read";
-                $messagestatus[$i]->save();
-            }
-        }
-        $lastMessage = ChatMessages::where('chatId', $chat_id)
-            ->orderByDesc('created_at')
-            ->value('content');
-
-        event(new SendChatMessage($chat_id));
-        return response()->json(["Last Message of chat" => $lastMessage, "Chat Description" => $chatdecrip[0]->chatDescription, "Messages" => [$combinedResults]],  200);
+        // event(new SendChatMessage( $chat_id));
+        return response()->json(["Chat Description" => $chatdecrip[0]->chatDescription, "Messages" => $combinedResults],  200);
     }
 
 

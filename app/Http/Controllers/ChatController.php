@@ -8,6 +8,7 @@ use App\Models\Admin;
 use Carbon\Carbon;
 use App\Models\groupChat;
 use App\Models\chat;
+use App\Models\ChatMessages;
 use App\Models\User;
 use App\Models\Cohort;
 use App\Models\Team;
@@ -193,13 +194,28 @@ class ChatController extends Controller
             $profile_image_url= $profile_image[0]->profile_image;
         }
 
-        $groupuser= chat::where('userId', $user_id)->select('chatId','chatName','chatType','userId','firstName')->paginate(40);
+        $groupuser= chat::where('userId', $user_id)->select('chatId','chatName','chatDescription','chatType','userId','firstName')->paginate(40);
 
         if($groupuser->count() <= 0 ){
             return response()->json(['Status' => 'failed', 'message' => 'User does not exist']);
         }
 
-      
+        $combinedResults = [];
+
+        foreach ($groupuser as $group) {
+            $chat_id = $group->chatId;
+        
+            $lastMessage = ChatMessages::where('chatId', $chat_id)
+                ->orderByDesc('created_at')
+                ->first();
+        
+            if ($lastMessage) {
+                $combinedResults[] = array_merge($group->toArray(), ['lastMessage' => $lastMessage->content]);
+            } else {
+                $combinedResults[] = $group->toArray();
+            }
+        }
+        
         
         // Return the chats as JSON
         // return response()->json($chats);
@@ -210,10 +226,10 @@ class ChatController extends Controller
                                 "per_page" => "40",
                                 "current_page" => "1",
                                 "last_page" => $groupuser->count(),
-                                "data" => [
-                                    $groupuser
+                                "data" => 
+                                    $combinedResults
                                     
-                                ]]);
+                                ]);
             }
 
 
@@ -747,7 +763,7 @@ class ChatController extends Controller
     public function getsupport()
     {
         $support = support::get();
-        return response()->json([$support]);
+        return response()->json($support);
     }
 
     public function updatesupport($id)
