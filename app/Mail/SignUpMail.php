@@ -36,9 +36,16 @@ class SignUpMail extends Mailable
 
     public function content(): Content
     {
-        return new Content(
-            view: 'mails.signup_mail',
-            with: ['User' => $this->User]
-        );
+        if ($this->User['role_name'] == 'Student') {
+            return new Content(
+                view: 'mails.student_signup_mail',
+                with: ['User' => $this->User]
+            );
+        } else {
+            return new Content(
+                view: 'mails.signup_mail',
+                with: ['User' => $this->User]
+            );
+        }
     }
 }

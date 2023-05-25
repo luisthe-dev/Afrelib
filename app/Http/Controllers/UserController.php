@@ -87,7 +87,7 @@ class UserController extends Controller
     public function updateUserPassword(Request $request)
     {
         $request->validate([
-            'old_password' => 'required|string|min:6',
+            'old_password' => 'required|string',
             'new_password' => 'required|string|min:6'
         ]);
 
@@ -287,7 +287,7 @@ class UserController extends Controller
             'password' => 'required|string'
         ]);
 
-        $User = User::where(['email' => $request->email])->first();
+        $User = User::where(['email' => $request->email, 'is_disabled' => false])->first();
 
 
         if (!$User) return ErrorResponse('Invalid Login Parameters');
