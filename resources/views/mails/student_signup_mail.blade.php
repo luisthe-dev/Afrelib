@@ -23,11 +23,11 @@
         <br />
         Email: {{ $User->email }}
         <br />
-        <br />
         Password: {{ $User->last_name }}
         <br />
         <br />
         We recommend you follow these steps:
+    </p>
     <ol>
         <li> Watch the web app video <a
                 href='https://drive.google.com/file/d/1khQ5WKtq6p2rXD-esNraSI-pRiPXuyEl/view?usp=drivesdk'>here</a> </li>
@@ -36,15 +36,16 @@
             you may have. These will be addressed during the upcoming student orientation on <a
                 href='http://airmail.calendar/2023-05-24%2012:00:00%20BST'>May 24th, 2023</a> </li>
     </ol>
-    <br />
-    <br />
-    Rest assured, we will be in touch with further details and to address any outstanding questions
-    you may have.
-    <br />
-    <br />
-    Once again, we extend our best wishes to you as you embark on this exciting journey.
-    <br />
-    <br />
-    We look forward to witnessing the amazing accomplishments you will achieve.
+    <p class="main-message">
+        <br />
+        <br />
+        Rest assured, we will be in touch with further details and to address any outstanding questions
+        you may have.
+        <br />
+        <br />
+        Once again, we extend our best wishes to you as you embark on this exciting journey.
+        <br />
+        <br />
+        We look forward to witnessing the amazing accomplishments you will achieve.
     </p>
 @endsection
