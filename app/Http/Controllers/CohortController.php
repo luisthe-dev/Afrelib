@@ -279,6 +279,9 @@ class CohortController extends Controller
 
                 foreach ($cohortTeams as $cohortTeam) {
                     $team = Team::where(['is_deleted' => false, 'id' => $cohortTeam])->first();
+
+                    if (!$team) return ErrorResponse("Team With Id: $cohortTeam Has Issues");
+
                     $teamMembers = json_decode($team->team_members, true);
                     foreach ($teamMembers as $teamMember) {
                         $user = User::where(['is_disabled' => false, 'id' => $teamMember])->first();
