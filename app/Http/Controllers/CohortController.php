@@ -273,14 +273,15 @@ class CohortController extends Controller
 
         Cohort::where([['start_date', '<=', $today], 'status' => 'Inactive'])->chunk(100, function ($cohorts) {
             foreach ($cohorts as $cohort) {
+
                 $cohortTeams = json_decode($cohort->cohort_teams, true);
                 $cohortMentors = json_decode($cohort->cohort_mentors, true);
                 $cohortPanelists = json_decode($cohort->cohort_panelists, true);
 
                 foreach ($cohortTeams as $cohortTeam) {
                     $team = Team::where(['is_deleted' => false, 'id' => $cohortTeam])->first();
-
-                    if (!$team) return ErrorResponse("Team With Id: $cohortTeam Has Issues");
+                    if (!$team) continue;
+		    echo json_encode($team);
 
                     $teamMembers = json_decode($team->team_members, true);
                     foreach ($teamMembers as $teamMember) {
