@@ -326,7 +326,7 @@ class CohortController extends Controller
                     if ($current == 'Friday') {
 
                         DB::table('weekly_deadline')->insert([
-                            'cohort_id' => $cohort->id,
+                            'cohort_id' => $cohort->cohort_id,
                             'week_number' => $weekNumber,
                             'week_start' => $currentStart,
                             'week_end' => $currentDate,
@@ -448,5 +448,19 @@ class CohortController extends Controller
         $weekDets->save();
 
         return SuccessResponse('Weekly Deadline Updated Successfully', $weekDets);
+    }
+
+    public function getCohortDeadlines($cohortId)
+    {
+
+        $cohort = Cohort::where(['cohort_id' => $cohortId, 'is_deleted' => false])->first();
+
+        if (!$cohort) return ErrorResponse('Cohort Does Not Exist');
+
+        $deadlines = DB::table('weekly_deadline')->where(['cohort_id' => $cohortId])->get();
+
+        if ($deadlines->count() < 1) return ErrorResponse('Cohort Has No Deadline Or Has Not Been Activated');
+
+        return SuccessResponse('Deadlines Fetched Successfully', $deadlines);
     }
 }
