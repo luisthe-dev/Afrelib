@@ -13,6 +13,7 @@ use App\Models\chat;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 
@@ -55,6 +56,21 @@ class UserController extends Controller
         }
 
         return $users;
+    }
+
+    public function searchUsers(Request $request)
+    {
+        $request->validate([
+            'search' => 'required|string'
+        ]);
+
+        $search = $request->search;
+
+        $users = User::where([['first_name', 'LIKE', '%' . $search . '%']])->orWhere([['last_name', 'LIKE', '%' . $search . '%']])->get();
+
+        if ($users->count() < 1) return ErrorResponse('No User Found');
+
+        return SuccessResponse('Users Found Successfully', $users);
     }
 
     public function sudentsNotInTeams()

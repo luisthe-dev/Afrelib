@@ -266,6 +266,87 @@ class CohortController extends Controller
         return SuccessResponse('Cohort Successfully Updated', $cohort);
     }
 
+    public function enableCohorts()
+    {
+
+        $today = Carbon::now();
+
+        Cohort::where([['start_date', '<=', $today], 'status' => 'Inactive'])->chunk(100, function ($cohorts) {
+            foreach ($cohorts as $cohort) {
+                $cohortTeams = json_decode($cohort->cohort_teams, true);
+                $cohortMentors = json_decode($cohort->cohort_mentors, true);
+                $cohortPanelists = json_decode($cohort->cohort_panelists, true);
+
+                foreach ($cohortTeams as $cohortTeam) {
+                    $team = Team::where(['is_deleted' => false, 'id' => $cohortTeam])->first();
+                    $teamMembers = json_decode($team->team_members, true);
+                    foreach ($teamMembers as $teamMember) {
+                        $user = User::where(['is_disabled' => false, 'id' => $teamMember])->first();
+
+                        $user->status = 'Active';
+                        $user->save();
+                    }
+                    $user = User::where(['is_disabled' => false, 'id' => $team->team_mentor])->first();
+
+                    $user->status = 'Active';
+                    $user->save();
+                }
+
+                foreach ($cohortMentors as $cohortMentor) {
+                    $user = User::where(['is_disabled' => false, 'id' => $cohortMentor])->first();
+
+                    $user->status = 'Active';
+                    $user->save();
+                }
+
+                foreach ($cohortPanelists as $cohortPanelist) {
+                    $user = User::where(['is_disabled' => false, 'id' => $cohortPanelist])->first();
+
+                    $user->status = 'Active';
+                    $user->save();
+                }
+
+
+                $startDate = Carbon::parse($cohort->start_date)->format('Y-m-d');
+                $endDate = Carbon::parse($cohort->end_date)->format('Y-m-d');
+
+                $weekNumber = 1;
+
+                $currentStart = $startDate;
+                $currentDate = $startDate;
+
+
+                while ($currentDate <= $endDate) {
+
+                    $current = Carbon::createFromFormat('Y-m-d', $currentDate)->format('l');
+
+                    if ($current == 'Friday') {
+
+                        DB::table('weekly_deadline')->insert([
+                            'cohort_id' => $cohort->id,
+                            'week_number' => $weekNumber,
+                            'week_start' => $currentStart,
+                            'week_end' => $currentDate,
+                            'created_at' => Carbon::now(),
+                            'updated_at' => Carbon::now()
+                        ]);
+                        $weekNumber = $weekNumber + 1;
+                    }
+
+                    if ($current == 'Monday') {
+                        $currentStart = $currentDate;
+                    }
+
+                    $currentDate = Carbon::createFromFormat('Y-m-d', $currentDate)->addDay()->format('Y-m-d');
+                }
+
+                $cohort->status = 'Active';
+
+                $cohort->save();
+            }
+        });
+    }
+
     public function createCohort(CreateCohortRequest $request)
     {
         $mentors = $request->mentorIds;
@@ -347,5 +428,22 @@ class CohortController extends Controller
         $cohort->save();
 
         return SuccessResponse('Cohort Deleted Successfully');
+    }
+
+    public function updateDeadlineDate(Request $request, $cohortId)
+    {
+
+        $request->validate([
+            'new_end_date' => 'required|date',
+            'week_number' => 'required|numeric'
+        ]);
+
+        $weekDets = DB::table('weekly_deadline')->where(['week_number' => $request->week_number, 'cohort_id' => $cohortId])->first();
+
+        $weekDets->week_end = $request->new_end_date;
+
+        $weekDets->save();
+
+        return SuccessResponse('Weekly Deadline Updated Successfully', $weekDets);
     }
 }

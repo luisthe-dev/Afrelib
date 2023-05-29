@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\Route;
 // use BeyondCode\LaravelWebSockets\WebSockets\WebSocket;
 
 
-Route::post('/status', [Controller::class, 'getStatus']);
+Route::post('status', [Controller::class, 'getStatus']);
 
 Route::get('roles', [RoleController::class, 'getRoles']);
 
@@ -37,7 +37,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         });
 
         Route::post('create', [ProjectController::class, 'createProject']);
-        Route::put('/{projectId}', [ProjectController::class, 'updateProject']);
+        Route::put('{projectId}', [ProjectController::class, 'updateProject']);
         Route::get('{teamId}', [ProjectController::class, 'getTeamProjects']);
         Route::get('cohort/{cohortId}', [ProjectController::class, 'getCohortProjects']);
 
@@ -51,19 +51,21 @@ Route::middleware(['auth:sanctum'])->group(function () {
         });
     });
 
-    Route::get('/mentees/{mentorId}', [UserController::class, 'getMentorMentees']);
+    Route::get('mentees/{mentorId}', [UserController::class, 'getMentorMentees']);
 
-    Route::get('/leaderboard/{cohort_id}', [CohortController::class, 'getTeamsLeaderBoard']);
+    Route::get('leaderboard/{cohort_id}', [CohortController::class, 'getTeamsLeaderBoard']);
 
     Route::post('upload/{uploadType}', [Controller::class, 'uploadFile']);
 
     Route::get('criteria/{cohort_id}', [CohortController::class, 'getCriteria']);
 
-    Route::get('/user', [UserController::class, 'getActiveAccount']);
-    Route::put('/user', [UserController::class, 'updateActiveUser']);
-    Route::put('/user/password', [UserController::class, 'updateUserPassword']);
+    Route::get('user', [UserController::class, 'getActiveAccount']);
+    Route::put('user', [UserController::class, 'updateActiveUser']);
+    Route::put('user/password', [UserController::class, 'updateUserPassword']);
+    Route::post('user/search', [UserController::class, 'searchUsers']);
 
     Route::post('chat', [OpenAIController::class, 'requestPrompt']);
+    Route::get('chat/history', [OpenAIController::class, 'getUserSearchHistory']);
 });
 
 Route::middleware(['auth:sanctum', 'ability:superiorAdmin'])->group(function () {
@@ -72,11 +74,13 @@ Route::middleware(['auth:sanctum', 'ability:superiorAdmin'])->group(function () 
 
     Route::get('cohorts', [CohortController::class, 'getAllCohorts']);
     Route::post('cohort', [CohortController::class, 'createCohort']);
+    Route::get('cohorts/enable', [CohortController::class, 'enableCohorts']);
     Route::get('cohort/{cohortId}', [CohortController::class, 'getSingleCohort']);
     Route::put('cohort/{cohortId}', [CohortController::class, 'updateCohort']);
     Route::delete('cohort/{cohortId}', [CohortController::class, 'deleteCohort']);
     Route::put('cohort/{cohortId}/panelist/add', [CohortController::class, 'addPanelist']);
     Route::put('cohort/{cohortId}/panelist/remove', [CohortController::class, 'removePanelist']);
+    Route::put('cohort/deadline/{cohortId}', [CohortController::class, 'updateDeadlineDate']);
 
     Route::get('teams', [TeamController::class, 'getAllTeams']);
     Route::get('team/{teamId}', [TeamController::class, 'getSingleTeam']);
