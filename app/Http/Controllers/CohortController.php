@@ -271,7 +271,7 @@ class CohortController extends Controller
 
         $today = Carbon::now();
 
-        Cohort::where([['start_date', '<=', $today], 'status' => 'Inactive', 'is_deleted' => true])->chunk(100, function ($cohorts) {
+        Cohort::where([['start_date', '<=', $today], 'status' => 'Inactive', 'is_deleted' => false])->chunk(100, function ($cohorts) {
             foreach ($cohorts as $cohort) {
 
                 $cohortTeams = json_decode($cohort->cohort_teams, true);
