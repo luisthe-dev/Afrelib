@@ -445,7 +445,10 @@ class CohortController extends Controller
 
         $weekDets->week_end = $request->new_end_date;
 
-        $weekDets->save();
+        DB::table('weekly_deadline')->where(['week_number' => $request->week_number, 'cohort_id' => $cohortId])->update([
+            'week_end' => $request->new_end_date,
+            'updated_at' => Carbon::now()
+        ]);
 
         return SuccessResponse('Weekly Deadline Updated Successfully', $weekDets);
     }
