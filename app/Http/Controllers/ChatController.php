@@ -206,11 +206,13 @@ class ChatController extends Controller
             $chat_id = $group->chatId;
         
             $lastMessage = ChatMessages::where('chatId', $chat_id)
-                ->orderByDesc('created_at')
-                ->first();
+                ->orderByDesc('created_at')->first(['senderName', 'content', 'mediaType', 'timestamp']);
+
+            $unread = ChatMessages::where('chatId', $chat_id)
+                ->orderByDesc('created_at')->where("status", "UnRead");
         
             if ($lastMessage) {
-                $combinedResults[] = array_merge($group->toArray(), ['lastMessage' => $lastMessage->content]);
+                $combinedResults[] = array_merge($group->toArray(),['Unread Messages' => $unread->count()], ['lastMessage' => $lastMessage]);
             } else {
                 $combinedResults[] = $group->toArray();
             }
@@ -474,10 +476,10 @@ class ChatController extends Controller
                     // Checking if user don't already exist in chat 
                     $chatUser= Chat::where('userId', $getteamMembersID[$a])->get();
                     
-                    if($chatUser->count() > 0 )
-                    {
-                        return response()->json(['error' => 'User is already in the group chat'], 404);
-                    }
+                    // if($chatUser->count() > 0 )
+                    // {
+                    //     return response()->json(['error' => 'User is already in the group chat'], 404);
+                    // }
 
                     // Getting all Panelist 
                     $Role= Role::where('role_name', 'Panelist')->get();
