@@ -365,47 +365,29 @@ class ChatController extends Controller
         $group_id= base64_encode("admin"."mentor");
 
         $admin = admin::all();
-        $user= user::where('role_id','Mentor')->get();
+        $role= Role::where('role_name', 'Panelist')->get();
 
-        // return response()->json([$user->count()]);
+        // return response()->json([$role[0]->role_id]);
+    
+        $user= User::where('role_id',$role[0]->role_id)->get();
 
-        // Adding all admin to the group chat 
-        if($admin->count() > 0){
-        for($a=0; $a <= $admin->count(); $a++)
-        {
-            $gchat= new groupChat;
-            $gchat->team_id = $group_id;
-            $gchat->team_name = "Admin" . $group_id;
-            $gchat->participant = $admin[$a]->first_name;
-            $gchat->userId = "Admin" . $a+1;
-            $gchat->role= "Admin";
-            $gchat->save();
+        // return response()->json([$users->count()]);
+    
+         // Adding all Mentor to the group chat
 
-            $chat= new chat;
-                $chat->chatId = 8888;
-                $chat->chatName = "Admin and Mentor";
-                $chat->chatDescription = "Welcome to Admin and Mentor Group Chat";
-
-                $chat->chatType = "AdminMentor";
-                $chat->userId = "Admin" . rand(0000,9999);
-                $chat->firstName = $admin[$a]->first_name;
-                $chat->lastName = $admin[$a]->last_name;
-                $chat->email = $admin[$a]->email;
-             
-                $chat->save();
-
-        }
-    }
-        // Adding all Mentor to the group chat
-
-        if($user->count() > 0){
+        //  if($user->count() > 0){
+            // return response()->json(["test"]);
             for($p=0; $p <= $user->count(); $p++)
             {
+                $email = User::where('email', $user[0]->email)->get();
+
+                // return response()->json([$emails[0]->email]);
+
                 $gchat= new groupChat;
                 $gchat->team_id = $group_id;
                 $gchat->team_name = "Mentor" . $group_id;
                 $gchat->participant = $user[$p]->first_name;
-                $gchat->userId = "Mentor" . $i+1;
+                $gchat->userId = $email[$p]->id;
                 $gchat->role= "Mentor";
                 $gchat->save();
 
@@ -416,19 +398,53 @@ class ChatController extends Controller
                 $chat->chatDescription = "Welcome to Admin and Mentor Group Chat";
 
                 $chat->chatType = "AdminMentor";
-                $chat->userId = "Mentor" . rand(0000,9999);
+                $chat->userId = $email[$p]->id;
                 $chat->firstName = $user[$p]->first_name;
                 $chat->lastName = $user[$p]->last_name;
                 $chat->email = $user[$p]->email;
              
                 $chat->save();
 
-    
+                if($admin->count() > 0){
+                    for($a=0; $a <= $admin->count(); $a++)
+                    {        
+                    $email = admin::where('email', $admin[$a]->email)->get();
+                    $chat= new chat;
+                    $chat->chatId = 8888;
+                    $chat->chatName = "Admin and Mentor";
+                    $chat->chatDescription = "Welcome to Admin and Mentor Group Chat";
+
+                    $chat->chatType = "AdminMentor";
+                    $chat->userId = $email[$a]->id;
+                    $chat->firstName = $admin[$a]->first_name;
+                    $chat->lastName = $admin[$a]->last_name;
+                    $chat->email = $admin[$a]->email;
+                
+                    $chat->save();
+
+                    return response()->json(['status' => 'Success', 'message' => 'Group chat successfully created for both mentors and admin']);
+
+
+                }
             }
+
         }
 
-          return response()->json(['status' => 'Success', 'message' => 'Group chat successfully created for both mentors and admin']);
+    //     if($admin->count() > 0){
+            
+    //         return response()->json([$email[0]->email]);
+         
+        
+    // }
 
+
+
+        // Adding all admin to the group chat 
+      
+    //  $users[2]->email
+   
+ 
+       
      }
 
 
