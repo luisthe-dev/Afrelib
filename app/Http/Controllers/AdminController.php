@@ -25,6 +25,9 @@ class AdminController extends Controller
  
         $newAdmin->save();
 
+        $email = Admin::where(['email', $request->email])->get();
+        
+
         // Adding admin to group chat 
         $group_id= base64_encode("admin"."mentor");
 
@@ -34,7 +37,7 @@ class AdminController extends Controller
             $gchat->team_id = $group_id;
             $gchat->team_name = "Admin" . $group_id;
             $gchat->participant = $request->first_name;
-            $gchat->userId = "Admin" . rand(0000,9999);
+            $gchat->userId = $email[0]->id;
             $gchat->role= "Admin";
             $gchat->save();
 
@@ -44,7 +47,7 @@ class AdminController extends Controller
             $chat->chatDescription = "Welcome to Admin and Mentor Group Chat";
 
             $chat->chatType = "AdminMentor";
-            $chat->userId = "Admin" . rand(0000,9999);
+            $chat->userId = $email[0]->id;
             $chat->firstName = $request->first_name;
             $chat->lastName = $request->last_name;
             $chat->email = $request->email;
