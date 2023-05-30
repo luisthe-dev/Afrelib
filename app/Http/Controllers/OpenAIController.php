@@ -43,22 +43,22 @@ class OpenAIController extends Controller
         ))->post('https://api.openai.com/v1/chat/completions', array(
             "model" => "gpt-3.5-turbo",
             "messages" => $messageContent,
-            "temperature" => 0.9,
+            "temperature" => 0.8,
             "n" => 1
 
         ));
 
-        DB::table('search_history')->insert([
+        $response = [
             'user_id' => $user->id,
             'search' => $promptText,
             'gpt_response' => json_encode($request->object()->choices[0]->message),
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
-        ]);
+        ];
 
+        DB::table('search_history')->insert($response);
 
-
-        return $request->object();
+        return $response;
     }
 
     public function getUserSearchHistory(Request $request)
@@ -66,7 +66,7 @@ class OpenAIController extends Controller
 
         $user = $request->user();
 
-        $searchHistory = DB::table('search_history')->where('user_id', $user->id)->get();
+        $searchHistory = DB::table('search_history')->where('user_id', $user->id)->orderByDesc('created_at')->paginate(40);
 
         return SuccessResponse('Search History Fetched Successfully', $searchHistory);
     }
