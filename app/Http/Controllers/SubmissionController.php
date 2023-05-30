@@ -130,8 +130,12 @@ class SubmissionController extends Controller
             if ($action == 'comment') {
                 $submissionFeedback['comment'] = $request->comment;
             } else if ($action == 'score') {
-                $submissionFeedback['score'] = $request->score;
-                $submissionFeedback['evaluated'] = true;
+                if ($submissionFeedback['evaluated'] == true) {
+                    return ErrorResponse('Score Can Not Be Updated');
+                } else {
+                    $submissionFeedback['score'] = $request->score;
+                    $submissionFeedback['evaluated'] = true;
+                }
             }
             $submissionFeedbacks[$submissionKey] = $submissionFeedback;
 
@@ -150,7 +154,8 @@ class SubmissionController extends Controller
             if ($action == 'comment') {
                 $newFeedback['comment'] = $request->comment;
             } else if ($action == 'score') {
-                return ErrorResponse('Score Can Not Be Updated');
+                $newFeedback['score'] = $request->score;
+                $newFeedback['evaluated'] = true;
             }
 
             array_push($submissionFeedbacks, $newFeedback);
