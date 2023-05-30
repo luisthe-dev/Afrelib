@@ -100,6 +100,28 @@ class ProjectController extends Controller
         foreach ($projects as $project) {
             $submissions = Submission::where(['project_id' => $project->id])->orderByDesc('created_at')->get();
 
+            foreach ($submissions as $submission) {
+                $submissionFeedbacks = json_decode($submission->panelist_feedback, true);
+
+                $feedbacks = array();
+                $average_score = 0;
+                $score_total = 0;
+
+                foreach ($submissionFeedbacks as $submissionFeedback) {
+                    $feedbackPanelist = $submissionFeedback['panelist_id'];
+                    $submissionFeedback['panelist'] = User::where(['id' => $feedbackPanelist])->first();
+
+                    $score_total = $score_total + $submissionFeedback['score'];
+
+                    array_push($feedbacks, $submissionFeedback);
+                }
+
+                if ($score_total != 0) $average_score = $score_total / sizeof($submissionFeedbacks);
+
+                $submission->panelist_feedback = $feedbacks;
+                $submission->average_score = $average_score;
+            }
+
             $project->submissions = $submissions;
         }
 
