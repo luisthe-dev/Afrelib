@@ -52,6 +52,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
 
     Route::get('mentees/{mentorId}', [UserController::class, 'getMentorMentees']);
+    Route::get('cohort/deadline/{cohortId}', [CohortController::class, 'getCohortDeadlines']);
 
     Route::get('leaderboard/{cohort_id}', [CohortController::class, 'getTeamsLeaderBoard']);
 
@@ -81,7 +82,6 @@ Route::middleware(['auth:sanctum', 'ability:superiorAdmin'])->group(function () 
     Route::put('cohort/{cohortId}/panelist/add', [CohortController::class, 'addPanelist']);
     Route::put('cohort/{cohortId}/panelist/remove', [CohortController::class, 'removePanelist']);
     Route::put('cohort/deadline/{cohortId}', [CohortController::class, 'updateDeadlineDate']);
-    Route::get('cohort/deadline/{cohortId}', [CohortController::class, 'getCohortDeadlines']);
 
     Route::get('teams', [TeamController::class, 'getAllTeams']);
     Route::get('team/{teamId}', [TeamController::class, 'getSingleTeam']);
