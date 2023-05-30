@@ -103,7 +103,7 @@ class UserController extends Controller
 
                 $chat= new chat;
                 $chat->chatId = 8888;
-                $chat->chatName = "Admin and Mentor";
+                $chat->chatName = "Admin and Mentor"; 
                 $chat->chatDescription = "Welcome to Admin and Mentor Group Chat";
 
                 $chat->chatType = "AdminMentor";

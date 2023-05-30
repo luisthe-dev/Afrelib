@@ -17,7 +17,15 @@ class DashboardController extends Controller
     public function admindashboard()
     {
         // Total number of teams 
-        $teams = DB::table('teams')->get();
+        $teams = DB::table('teams')->where('is_deleted', 0)->get();
+
+        if($teams->count() <= 0)
+        {
+            $total_teams = 0;
+        }
+        else{
+            $total_teams = $teams->count();
+        }
  
         // Getting Students role id 
         $student_roles= DB::table('roles')->where('role_name', 'Student')->get(); 
@@ -29,13 +37,38 @@ class DashboardController extends Controller
         $panelist_roles= DB::table('roles')->where('role_name', 'Panelist')->get(); 
         
         // Total number of students
-        $students= DB::table('users')->where('role_id', $student_roles[0]->role_id)->get(); 
+        $students= DB::table('users')->where('role_id', $student_roles[0]->role_id)->where('is_disabled', 0)->get(); 
+
+        if($students->count() <= 0)
+        {
+            $total_students = 0;
+        } else{
+            $total_students = $students->count();
+        }
 
         // Total number of mentors
-        $mentors= DB::table('users')->where('role_id', $mentor_roles[0]->role_id)->get(); 
+        $mentors= DB::table('users')->where('role_id', $mentor_roles[0]->role_id)->where('is_disabled', 0)->get(); 
+
+        if($mentors->count() <= 0)
+        {
+            $total_mentors = 0;
+        }
+        else{
+            $total_mentors = $mentors->count();
+        }
+
 
         // Total number of panelists
-        $panelists= DB::table('users')->where('role_id', $panelist_roles[0]->role_id)->get(); 
+        $panelists= DB::table('users')->where('role_id', $panelist_roles[0]->role_id)->where('is_disabled', 0)->get(); 
+
+        if($panelists->count() <= 0)
+        {
+            $total_panelists = 0;
+        }
+        else{
+            $total_panelists = $panelists->count();
+        }
+
 
         $today = Carbon::today()->toDateString();
 
@@ -43,10 +76,30 @@ class DashboardController extends Controller
         $weekNumber = DB::table('weekly_deadline')->whereDate('week_start', '<=', $today)
         ->whereDate('week_end', '>=', $today)
         ->get();
+      
+
+        if($weekNumber->count() == 0)
+        {
+            $week_number = 0;
+            // return response()->json([$weekNumber->count()]);
+
+        }
+        else{
+            $week_number = $weekNumber[0]->week_number;
+        }
+
 
       // Getting total submissions 
-        $submission = DB::table('submissions')->where('submission_week', $weekNumber[0]->week_number)->get();
-        
+        $submission = DB::table('submissions')->where('submission_week', $week_number)->where('is_deleted', 0)->get();
+
+        if($submission->count() <= 0)
+        {
+            $total_submission = 0;
+            
+        }
+        else{
+            $total_submission = $submission->count();
+        }
 
         return response()->json([
             "total_teams" => $teams->count(),
@@ -79,7 +132,7 @@ class DashboardController extends Controller
         }
 
         // Getting total teams         
-        $cohortTeamsCounts = DB::table('cohorts')->where('cohort_id',$weekNumber[0]->cohort_id)->pluck('cohort_teams')
+        $cohortTeamsCounts = DB::table('cohorts')->where('cohort_id',$weekNumber[0]->cohort_id)->where('is_deleted', 0)->pluck('cohort_teams')
         ->map(function ($cohortTeams) {
             $decodedArray = json_decode($cohortTeams);
             return count($decodedArray);
@@ -90,7 +143,7 @@ class DashboardController extends Controller
         ->first();
 
         // Getting total submissions 
-        $submission = DB::table('submissions')->where('submission_week', $weekNumber[0]->week_number)->get();
+        $submission = DB::table('submissions')->where('submission_week', $weekNumber[0]->week_number)->where('is_deleted', 0)->get();
         
         return response()->json([
             "submission_deadline_date" => $weekNumber[0]->week_end,
@@ -99,8 +152,6 @@ class DashboardController extends Controller
             "num_submissions" => $submission->count()
 
         ]);
-
-
         
     }
 
@@ -108,26 +159,28 @@ class DashboardController extends Controller
     public function studentdashboard()
     {
         $today = Carbon::today()->toDateString();
-
+      
         // Getting sumission deadline date 
         $weekNumber = DB::table('weekly_deadline')->whereDate('week_start', '<=', $today)
         ->whereDate('week_end', '>=', $today)
         ->get();
      
+        // return response()->json([$weekNumber->count()]);
          // Checking for submission deadline date 
-         if($weekNumber->isEmpty()){
+         if($weekNumber->count() <= 0){
             $weekset = 0;
             $deadline = 0;
-                //    return response()->json(["test"]);
+                
         }
 
         if($weekNumber->count() > 0){
             $weekset = $weekNumber[0]->week_number;
+      
             $deadline = $weekNumber[0]->week_end;
             }
         // return response()->json([$weekNumber[0]->week_number]);
         
-        $submission = DB::table('submissions')->where('submission_week', $weekset)->get();
+        $submission = DB::table('submissions')->where('submission_week', $weekset)->where('is_deleted', 0)->get();
 
         if($submission->isEmpty()){
             // return response()->json(["test"]);
@@ -156,8 +209,7 @@ class DashboardController extends Controller
         // $leader_point = DB::table('submissions')->where('submission_week', $weekset)->sum('panelist_feedback');
 
         $feedbackData = DB::table('submissions')
-    ->where('submission_week', $weekset)
-    ->pluck('panelist_feedback');
+    ->where('submission_week', $weekset)->where('is_deleted', 0)->pluck('panelist_feedback');
 
     if($feedbackData->count() <= 0)
     {
@@ -204,7 +256,7 @@ class DashboardController extends Controller
     
             // Getting mentor id 
             // $mentorsId = Role::where(['role_name' => 'Mentor'])->first()->role_id;
-            $mentorTeams = Team::where(['team_mentor' => $mentorId, 'is_deleted' => false])->get();
+            $mentorTeams = Team::where(['team_mentor' => $mentorId, 'is_deleted' => false])->where('is_deleted', 0)->get();
 
             return response()->json([
                 "submission_deadline_date" => 0,
@@ -231,7 +283,7 @@ class DashboardController extends Controller
         // $submissi = DB::table('submissions')->get();
         // $re= json_decode($submissi[0]->panelist_feedback);
         // $sum= $re[0];
-        $submissions = DB::table('submissions')->where('submission_week', $currentWeek)->get(); // Retrieve all submissions from the 'submissions' table
+        $submissions = DB::table('submissions')->where('submission_week', $currentWeek)->where('is_deleted', 0)->get(); // Retrieve all submissions from the 'submissions' table
 
         if($submissions->isEmpty())
         {
@@ -244,7 +296,7 @@ class DashboardController extends Controller
     
             // Getting mentor id 
             // $mentorsId = Role::where(['role_name' => 'Mentor'])->first()->role_id;
-            $mentorTeams = Team::where(['team_mentor' => $mentorId, 'is_deleted' => false])->get();
+            $mentorTeams = Team::where(['team_mentor' => $mentorId, 'is_deleted' => false])->where('is_deleted', 0)->get();
     
             if($currentWeek == ""){
                 return response()->json([
@@ -281,7 +333,7 @@ class DashboardController extends Controller
                 }
             
                 // Retrieve previous week's submissions
-                $previousSubmissions = DB::table('submissions')->where('submission_week', $previousWeek)->get();
+                $previousSubmissions = DB::table('submissions')->where('submission_week', $previousWeek)->where('is_deleted', 0)->get();
             
                 $previousTotalPoints = 0;
                 foreach ($previousSubmissions as $previousSubmission) {
@@ -347,7 +399,7 @@ class DashboardController extends Controller
 
         // Getting mentor id 
         // $mentorsId = Role::where(['role_name' => 'Mentor'])->first()->role_id;
-        $mentorTeams = Team::where(['team_mentor' => $mentorId, 'is_deleted' => false])->get();
+        $mentorTeams = Team::where(['team_mentor' => $mentorId, 'is_deleted' => false])->where('is_deleted', 0)->get();
 
         return response()->json([
             "submission_deadline_date" => $weekNumber[0]->week_end,
