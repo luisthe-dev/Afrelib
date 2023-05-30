@@ -52,7 +52,7 @@ class AdminController extends Controller
             $chat->lastName = $request->last_name;
             $chat->email = $request->email;
          
-            $chat->save();
+            $chat->save();    
 
     
         return SuccessResponse('Admin Created Successfully', $newAdmin);
