@@ -169,8 +169,7 @@ class DashboardController extends Controller
          // Checking for submission deadline date 
          if($weekNumber->count() <= 0){
             $weekset = 0;
-            $deadline = 0;
-                
+            $deadline = 0;       
         }
 
         if($weekNumber->count() > 0){

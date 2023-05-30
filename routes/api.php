@@ -208,14 +208,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('support', [ChatController::class, 'support']);
 
     // Retrieve student dashboard data
-    Route::get('dashboard/student', [DashboardController::class, 'studentdashboard']);
+    // Route::get('dashboard/student', [DashboardController::class, 'studentdashboard']);
 
-    // Retrieve panlist dashbboard data
-    Route::get('dashboard/panelist', [DashboardController::class, 'panelistdashboard']);
+    // // Retrieve panlist dashbboard data
+    // Route::get('dashboard/panelist', [DashboardController::class, 'panelistdashboard']);
 
-    // Retrieve mentor dashbboard data
-    Route::get('dashboard/mentor', [DashboardController::class, 'mentordashboard']);
-
+    // // Retrieve mentor dashbboard data
+    // Route::get('dashboard/mentor', [DashboardController::class, 'mentordashboard']);
 
 
     // Returning all unread messages back to read
@@ -328,7 +327,8 @@ Route::prefix('dashboard')->group(function () {
     Route::middleware(['auth:sanctum', 'ability:superiorAdmin'])->get('admin', [DashboardController::class, 'admindashboard']);
 
     // Retrieve student dashboard data
-    Route::middleware(['auth:sanctum', 'ability:Student'])->get('student', [DashboardController::class, 'studentdashboard']);
+    // Route::middleware(['auth:sanctum', 'ability:Student'])->get('student', [DashboardController::class, 'studentdashboard']);
+    Route::middleware(['auth:sanctum'])->get('student', [DashboardController::class, 'studentdashboard']);
 
     // Retrieve panlist dashbboard data
     Route::middleware(['auth:sanctum', 'ability:Panelist'])->get('panelist', [DashboardController::class, 'panelistdashboard']);

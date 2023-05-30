@@ -52,7 +52,6 @@ class UserController extends Controller
 
     public function createUser(CreateUserRequest $request)
     {
-
         if ($request->date_of_birth) $request->validate([
             'date_of_birth' => 'date'
         ]);
@@ -74,6 +73,8 @@ class UserController extends Controller
             'role_id' => $role->role_id
         ]);
 
+
+
         if ($role->role_name == 'Student') {
             $request->validate([
                 'school_name' => 'required|string'
@@ -86,6 +87,11 @@ class UserController extends Controller
 
         $user->role_name = $role->role_name;
 
+        $email = User::where(['email' => $request->email])->get();
+        
+        // return response()->json([$email[0]->id]);
+
+
         if ($role->role_name == 'Mentor'){
             // Adding mentor to group chat 
             $group_id= base64_encode("admin"."mentor");
@@ -96,7 +102,7 @@ class UserController extends Controller
                 $gchat->team_id = $group_id;
                 $gchat->team_name = "Mentor" . $group_id;
                 $gchat->participant = $request->first_name;
-                $gchat->userId = "Mentor" . rand(0000,9999);
+                $gchat->userId = $email[0]->id;
                 $gchat->role= "Mentor";
                 $gchat->save();
 
@@ -107,7 +113,7 @@ class UserController extends Controller
                 $chat->chatDescription = "Welcome to Admin and Mentor Group Chat";
 
                 $chat->chatType = "AdminMentor";
-                $chat->userId = "Mentor" . rand(0000,9999);
+                $chat->userId = $email[0]->id;
                 $chat->firstName = $request->first_name;
                 $chat->lastName = $request->last_name;
                 $chat->email = $request->email;
@@ -120,13 +126,13 @@ class UserController extends Controller
             $panel_id= base64_encode("Panelist");
             // Adding new panelist to the group chat 
 
-                $gchat= new groupChat;
-                $gchat->team_id = $panel_id;
-                $gchat->team_name = "Panelist" . rand(0000,9999);
-                $gchat->participant = $request->first_name;
-                $gchat->userId = "Panelist" . rand(0000,9999);
-                $gchat->role= "Panelist";
-                $gchat->save();
+                // $gchat= new groupChat;
+                // $gchat->team_id = $panel_id;
+                // $gchat->team_name = "Panelist" . rand(0000,9999);
+                // $gchat->participant = $request->first_name;
+                // $gchat->userId = "Panelist" . rand(0000,9999);
+                // $gchat->role= "Panelist";
+                // $gchat->save();
 
                 $chat= new chat;
                 $chat->chatId = 9999;
@@ -134,7 +140,7 @@ class UserController extends Controller
                 $chat->chatDescription = "Welcome to Panelist Group Chat";
 
                 $chat->chatType = "Panelist";
-                $chat->userId = "Panelist" . rand(0000,9999);
+                $chat->userId = $email[0]->id;
                 $chat->firstName = $request->first_name;
                 $chat->lastName = $request->last_name;
                 $chat->email = $request->email;
