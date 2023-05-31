@@ -14,7 +14,7 @@
         <br />
         <br />
         Please visit the Afrelib AI Challenge Hub at <a
-            href='https://afrelib-client.vercel.app/login'>https://afrelib-client.vercel.app/login</a> to access the
+            href='http://app.afrelibai.academy/'>http://app.afrelibai.academy/</a> to access the
         resources and tools you'll need throughout the challenge.
         <br />
         <br />
