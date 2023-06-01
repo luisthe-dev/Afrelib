@@ -112,14 +112,57 @@ class DashboardController extends Controller
 
     }
 
-    public function panelistdashboard()
+    public function panelistdashboard(Request $request)
     {
         $today = Carbon::today()->toDateString();
 
+        $panel_id = $request->user()->id; // Replace with the desired user ID
+
+        $cohort_id = DB::table('cohorts')
+        ->where(function ($query) use ($panel_id) {
+            $query->whereRaw("FIND_IN_SET(?, REPLACE(REPLACE(cohort_panelists, '[', ''), ']', ''))", [$panel_id]);
+        })
+        ->value('cohort_id');
+
+        $cohortTeams = DB::table('cohorts')
+            ->where('cohort_id', $cohort_id)
+            ->value('cohort_teams');
+
+        $cohortTeamsArray = [];
+        if ($cohortTeams) {
+            $cohortTeamsArray = json_decode($cohortTeams);
+        }
+
+        // return response()->json($cohortTeamsArray);
+
+        
+            $teamMembers = DB::table('teams')
+            ->whereIn('id', $cohortTeamsArray)
+            ->pluck('team_members')
+            ->toArray();
+
+            if($teamMembers == "")
+            {
+                $teamMembers = 0;
+            }
+
+            $allTeamMembers = [];
+            foreach ($teamMembers as $members) {
+            $membersArray = json_decode($members, true);
+            $allTeamMembers = array_merge($allTeamMembers, $membersArray);
+            }
+
+            $totalRecords = DB::table('submissions')
+            ->whereIn('submitter_id', $allTeamMembers)
+            ->count();
+           
+         
+
         // Getting sumission deadline date 
         $weekNumber = DB::table('weekly_deadline')->whereDate('week_start', '<=', $today)
-        ->whereDate('week_end', '>=', $today)
+        ->whereDate('week_end', '>=', $today)->where('cohort_id', $cohort_id)
         ->get();
+
         if($weekNumber->isEmpty())
         {
             return response()->json([
@@ -132,7 +175,7 @@ class DashboardController extends Controller
         }
 
         // Getting total teams         
-        $cohortTeamsCounts = DB::table('cohorts')->where('cohort_id',$weekNumber[0]->cohort_id)->where('is_deleted', 0)->pluck('cohort_teams')
+        $cohortTeamsCounts = DB::table('cohorts')->where('cohort_id',$cohort_id)->where('is_deleted', 0)->pluck('cohort_teams')
         ->map(function ($cohortTeams) {
             $decodedArray = json_decode($cohortTeams);
             return count($decodedArray);
@@ -149,20 +192,50 @@ class DashboardController extends Controller
             "submission_deadline_date" => $weekNumber[0]->week_end,
             "current_week" => $weekNumber[0]->week_number,
             "num_teams_in_cohort" => $cohortTeamsCounts,
-            "num_submissions" => $submission->count()
+            "num_submissions" => $totalRecords
 
         ]);
         
     }
 
     // Student dashboard 
-    public function studentdashboard()
+    public function studentdashboard(Request $request)
     {
+        $userId = $request->user()->id; // Replace with the desired user ID
+
+        $team_id = DB::table('teams')
+        ->where(function ($query) use ($userId) {
+            $query->whereRaw("FIND_IN_SET(?, REPLACE(REPLACE(team_members, '[', ''), ']', ''))", [$userId]);
+        })
+        ->value('id');
+
+        if($team_id == "" ){
+            $team_id = 0;
+        }
+
+
+        $cohort_id = DB::table('cohorts')
+        ->where(function ($query) use ($team_id) {
+            $query->whereRaw("FIND_IN_SET(?, REPLACE(REPLACE(cohort_teams, '[', ''), ']', ''))", [$team_id]);
+        })
+        ->value('cohort_id');
+    
+        if($cohort_id == "" ){
+            $cohort_id = 0;
+        }
+        // lWqvQKNds0g8
+
+        // return response()->json($cohort_id);
+        // $memberIds will contain the IDs of the teams where the user is a member
+
+        $team = team::where('team_members', $request->user()->id)->get();
+        // return response()->json([$request->user()->id]);
+
         $today = Carbon::today()->toDateString();
       
         // Getting sumission deadline date 
         $weekNumber = DB::table('weekly_deadline')->whereDate('week_start', '<=', $today)
-        ->whereDate('week_end', '>=', $today)
+        ->whereDate('week_end', '>=', $today)->where('cohort_id', $cohort_id)
         ->get();
      
         // return response()->json([$weekNumber->count()]);
@@ -242,8 +315,26 @@ class DashboardController extends Controller
 
     public function mentordashboard(Request $request)
     {
+        $teamMentor = $request->user()->id; // Replace with the desired user ID
+
+            $teamId = DB::table('teams')
+        ->where('team_mentor', $teamMentor)
+        ->pluck('id');
+
+       
+        $cohortId = DB::table('cohorts')
+        ->where(function ($query) use ($teamId) {
+            foreach ($teamId as $id) {
+                $query->orWhere('cohort_teams', 'like', '%['.$id.',%')
+                    ->orWhere('cohort_teams', 'like', '%,'.$id.',%')
+                    ->orWhere('cohort_teams', 'like', '%,'.$id.']%');
+            }
+        })
+        ->value('cohort_id');
+
+
         $today = Carbon::today()->toDateString();
-        $weekNumber = DB::table('weekly_deadline')->whereDate('week_start', '<=', $today)
+        $weekNumber = DB::table('weekly_deadline')->where('cohort_id', $cohortId )->whereDate('week_start', '<=', $today)
         ->whereDate('week_end', '>=', $today)
         ->get();
 
@@ -251,7 +342,7 @@ class DashboardController extends Controller
             $user = Auth::user(); // Get the authenticated user
         
             // Retrieve the mentor ID from the user model
-            $mentorId = $user->id;
+            $mentorId = $request->user()->id;
     
             // Getting mentor id 
             // $mentorsId = Role::where(['role_name' => 'Mentor'])->first()->role_id;
@@ -391,19 +482,26 @@ class DashboardController extends Controller
         // ->whereDate('week_end', '>=', $today)
         // ->get();
 
-        $user = Auth::user(); // Get the authenticated user
-        
-        // Retrieve the mentor ID from the user model
-        $mentorId = $user->id;
-
         // Getting mentor id 
         // $mentorsId = Role::where(['role_name' => 'Mentor'])->first()->role_id;
-        $mentorTeams = Team::where(['team_mentor' => $mentorId, 'is_deleted' => false])->where('is_deleted', 0)->get();
+        $teamMembers = DB::table('teams')
+    ->where('team_mentor', $teamMentor)
+    ->pluck('team_members')
+    ->map(function ($members) {
+        return json_decode($members, true);
+    })
+    ->toArray();
+
+        $totalMemebers = count($teamMembers[0]);
+
+        // return response()->json($totalMemebers);
+
+        $mentorTeams = Team::where(['team_mentor' =>        $teamMentor, 'is_deleted' => false])->where('is_deleted', 0)->get();
 
         return response()->json([
             "submission_deadline_date" => $weekNumber[0]->week_end,
             "current_week" => $weekNumber[0]->week_number,
-            "num_mentees" => $mentorTeams->count(),
+            "num_mentees" => $totalMemebers,
             "team_points" => $results
 
         ]);

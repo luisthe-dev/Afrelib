@@ -335,4 +335,5 @@ Route::prefix('dashboard')->group(function () {
 
     // Retrieve mentor dashbboard data
     Route::middleware(['auth:sanctum', 'ability:Mentor'])->get('mentor', [DashboardController::class, 'mentordashboard']);
+
 });
