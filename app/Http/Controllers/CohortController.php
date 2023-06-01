@@ -9,6 +9,9 @@ use App\Models\Submission;
 use App\Models\Team;
 use App\Models\User;
 use Carbon\Carbon;
+use App\Models\chat;
+use App\Models\Admin;
+use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -416,6 +419,137 @@ class CohortController extends Controller
         $cohort->mentors = $mentorsData;
         $cohort->panelists = $panelistData;
         $cohort->students = $teamsData;
+
+
+        // Add cohort to chat
+
+        $team = json_encode($request->teamIds);
+        // Pulling teams from the cohorts table
+        $team_id = json_decode($team);
+
+        // Pulling mentors from the cohorts table
+        $cohort = json_encode($request->mentorIds);
+        $cohort_mentors = json_decode($cohort);
+
+        // Pulling mentors from the panelists table
+        $panelist = json_encode($request->panelistIds);
+        $cohort_panelists = json_decode($panelist);
+
+
+        for ($i = 0; $i < count($team_id); $i++) {
+            $chatId = $cohortId;
+            // Getting team members using ID
+            $teamMembersID = Team::where('id', $team_id[$i])->get();
+            $getteamMembersID = json_decode($teamMembersID[0]->team_members, true);
+            $getteamMentor = $teamMembersID[0]->team_mentor;
+
+            // return response()->json([$teamMembersID[0]->team_mentor]);
+
+
+            // Processing the users of the system
+            for ($a = 0; $a < count($getteamMembersID); $a++) {
+
+                // Checking if user don't already exist in chat
+                $chatUser = Chat::where('userId', $getteamMembersID[$a])->get();
+
+                // Getting all Panelist
+                $Role = Role::where('role_name', 'Panelist')->get();
+
+                // Getting users details from table and creating chat
+
+                $user = User::where('id', $getteamMembersID[$a])->where('role_id', '!=', "Panelist")->get();
+
+                // return response()->json([substr($cohort_id, 0, 2)]);
+                $chat = new Chat;
+                $chat->chatId =  $chatId;
+                $chat->chatName = $request->cohort_name;
+                $chat->chatDescription = 'Welcome to a new group chat';
+                $chat->chatType = 'Cohort Group';
+                $chat->userId = "user" . $getteamMembersID[$a];
+                $chat->firstName = $user[0]->first_name;
+                $chat->lastName = $user[0]->last_name;
+                $chat->email = $user[0]->email;
+                $chat->save();
+
+                // End processing users
+            }
+
+            // Processing mentors on teams table
+            for ($t = 0; $t < $teamMembersID->count(); $t++) {
+                //    if($t < $teamMembersID->count())
+                //    {
+                // Checking if user don't already exist in chat
+                $teamMentor = Chat::where('userId', $getteamMentor)->get();
+
+                // Getting users details from table and creating chat
+
+                $user = User::where('id', $getteamMentor)->get();
+
+                // return response()->json([substr($cohort_id, 0, 2)]);
+                $chat = new Chat;
+                $chat->chatId =  $chatId;
+                $chat->chatName = $request->cohort_name;
+                $chat->chatDescription = 'Welcome to a new group chat';
+                $chat->chatType = 'Cohort Group';
+                $chat->userId = "tmentor" . $teamMembersID[0]->team_mentor;
+                $chat->firstName = $user[0]->first_name;
+                $chat->lastName = $user[0]->last_name;
+                $chat->email = $user[0]->email;
+                $chat->save();
+
+                //    }
+            }
+
+
+            for ($m = 0; $m < count($cohort_mentors); $m++) {
+
+                // Getting users details from table and creating chat
+
+                $user = User::where('id', $cohort_mentors[$m])->get();
+
+                // return response()->json([substr($cohort_id, 0, 2)]);
+                $chat = new Chat;
+                $chat->chatId =  $chatId;
+                $chat->chatName = $request->cohort_name;
+                $chat->chatDescription = 'Welcome to a new group chat';
+                $chat->chatType = 'Cohort Group';
+                $chat->userId = "cmentor" . $cohort_mentors[$m];
+                $chat->firstName = $user[0]->first_name;
+                $chat->lastName = $user[0]->last_name;
+                $chat->email = $user[0]->email;
+                $chat->save();
+            }
+
+            for ($p = 0; $p < count($cohort_panelists); $p++) {
+                // Getting users details from table and creating chat
+
+                $user = User::where('id', $cohort_panelists[$p])->get();
+
+                // return response()->json([substr($cohort_id, 0, 2)]);
+                $chat = new Chat;
+                $chat->chatId =  $chatId;
+                $chat->chatName = $request->cohort_name;
+                $chat->chatDescription = 'Welcome to a new group chat';
+                $chat->chatType = 'Cohort Group';
+                $chat->userId = "cpanel" . $cohort_panelists[$p];
+                $chat->firstName = $user[0]->first_name;
+                $chat->lastName = $user[0]->last_name;
+                $chat->email = $user[0]->email;
+                $chat->save();
+            }
+
+            $admin = admin::all();
+            $chat = new Chat;
+            $chat->chatId =  $chatId;
+            $chat->chatName = $request->cohort_name;
+            $chat->chatDescription = 'Welcome to a new group chat';
+            $chat->chatType = 'Cohort Group';
+            $chat->userId = "admin" . $admin[0]->id;
+            $chat->firstName = $admin[0]->first_name;
+            $chat->lastName = $admin[0]->last_name;
+            $chat->email = $admin[0]->email;
+            $chat->save();
+        }
 
         return SuccessResponse('Cohort Created Successfully', $cohort);
     }

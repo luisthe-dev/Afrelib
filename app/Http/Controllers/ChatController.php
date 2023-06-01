@@ -589,7 +589,7 @@ class ChatController extends Controller
                // return response()->json([substr($cohort_id, 0, 2)]);
                $chat= new Chat;
                $chat->chatId =  $chatId;
-               $chat->chatName = 'Cohort' . $cohort_id;
+               $chat->chatName = $validateCohort[0]->cohort_name;
                $chat->chatDescription = 'Welcome to a new group chat';
                $chat->chatType = 'Cohort Group';
                $chat->userId = "cpanel".$cohort_panelists[$p];
@@ -603,7 +603,7 @@ class ChatController extends Controller
             $admin= admin::all();
             $chat= new Chat;
             $chat->chatId =  $chatId;
-            $chat->chatName = 'Cohort' . $cohort_id;
+            $chat->chatName = $validateCohort[0]->cohort_name;
             $chat->chatDescription = 'Welcome to a new group chat';
             $chat->chatType = 'Cohort Group';
             $chat->userId = "admin".$admin[0]->id;
