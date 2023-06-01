@@ -31,7 +31,7 @@ class ChatController extends Controller
 
         if($team_name->count() <= 0)
         {
-            $name_of_team = "Team" . $request->team_id;
+            return response()->json(['Team name could not be found. Please confirm team id again']); 
         }
 
         if($team_name->count() > 0)
@@ -41,14 +41,6 @@ class ChatController extends Controller
 
 
         for($i=0; $i<$no_of_participant; $i++){
-            $gchat= new groupChat;
-            $gchat->team_id = $request->team_id;
-            $gchat->team_name = $name_of_team;
-            $gchat->participant = $request->participants[$i];
-            $gchat->userId = "User" . $i+1;
-            $gchat->role= "Member";
-            $gchat->save();
-
 
              $chat= new chat;
 
