@@ -30,11 +30,15 @@ class AdminController extends Controller
 
         $newAdmin->save();
 
-        $email = Admin::where(['email', $request->email])->get();
+        // return response()->json([$request->email]);
 
+        $email = Admin::where('email', $request->email)->get();
 
         // Adding admin to group chat
         $group_id = base64_encode("admin" . "mentor");
+
+        // Adding new admin to the group chat
+
 
         // Adding new admin to the group chat
 
