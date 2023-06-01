@@ -42,7 +42,7 @@ class UserController extends Controller
 
     public function allUsers()
     {
-        $users = User::orderByDesc('created_at')->paginate(50);
+        $users = User::orderByDesc('created_at')->paginate(200);
 
         foreach ($users as $user) {
             $user_role = $user->role_id;
