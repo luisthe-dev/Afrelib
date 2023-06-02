@@ -123,10 +123,115 @@ class ChatController extends Controller
     // Deleting user from chat 
     public function deleteuser($chatId, $userId)
     {
-        $deleteuser= groupChat::where('team_id', $chatId)->where('userId', $userId)->get();
-        $deleteuser[0]->delete();
+        $deleteuser= chat::where('chatId', $chatId)->where('userId', $userId)->delete();
+
         return response()->json(['Success' => 'true', 'message' => 'User successfully removed from group chat']);
 
+    }
+    // Adding new user to chat 
+    public function addnewusertochat($chatId, $userId)
+    {
+        $user = chat::where('chatId', $chatId)->where('userId', $userId)->get();
+
+        if($user->count() > 0)
+        {
+            return response()->json(['User is already in this group chat']);
+        }
+        else{
+            $user_info = User::where('id',$userId)->get();
+            
+            // Checking user 
+            if($user_info->count() <= 0){
+                return response()->json(['The user you are trying to adding is not in the records']);
+            }
+
+            $chat_info = chat::where('chatId', $chatId)->get();
+            // Checking chat info 
+            if($chat_info->count() <= 0){
+                return response()->json(['The chat id entered does not exist']);
+            }
+            
+            $chat = new chat;
+            $chat->chatId = $chatId;
+            $chat->chatName = $chat_info[0]->chatName;
+            $chat->chatDescription = $chat_info[0]->chatDescription;
+            $chat->chatType = $chat_info[0]->chatType;
+            $chat->userId = $userId;
+            $chat->firstName = $user_info[0]->first_name;
+            $chat->lastName = $user_info[0]->last_name;
+            $chat->email = $user_info[0]->email;
+
+            $chat->save();
+
+            return response()->json(['Success' => 'true', 'message' => 'New user added successfully to the group chat']);
+
+        }
+
+    }
+
+    // Adding user to existing chat(latrer use) 
+    public function addtoexistchat($teamId, $userId)
+    {
+        // Deleting user from existing chat 
+        $exist_chat = chat::where('userId', $userId)->delete();
+
+        // Getting team members with team id 
+        $teamMembers = Team::select('team_members')
+        ->where('team_id', $teamId)
+        ->get()
+        ->pluck('team_members')
+        ->map(function ($teamMembers) {
+            return json_decode($teamMembers);
+        })
+        ->first();
+
+        if(empty($teamMembers))
+        {
+            return response()->json(["Could not find team with the team_id"]);
+        }
+   
+        // Getting chat_id 
+        $chat_info =  chat::whereIn('userId', $teamMembers)
+        ->get();
+        if($chat_info->count() <= 0)
+        {
+            return response()->json(["The team you are moving this user does not have a group chat available"]);
+        }
+       
+
+        // Getting user info 
+        $user_info = User::where('id',$userId)->get();
+        
+            // Checking user 
+            if($user_info->count() <= 0){
+                return response()->json(['The user you are trying to adding is not in the records']);
+            }
+        
+            $chat = new chat;
+            $chat->chatId = $chat_info[0]->chatId;
+            $chat->chatName = $chat_info[0]->chatName;
+            $chat->chatDescription = $chat_info[0]->chatDescription;
+            $chat->chatType = $chat_info[0]->chatType;
+            $chat->userId = $userId;
+            $chat->firstName = $user_info[0]->first_name;
+            $chat->lastName = $user_info[0]->last_name;
+            $chat->email = $user_info[0]->email;
+
+            $chat->save();
+
+        // // Adding user to the chat 
+
+        return response()->json(["User was successfully moved to new group chat"]);
+
+    }
+
+
+    // Deleting Group chat 
+    public function deletechat($chatId)
+    {
+        $deletechat = chat::where('chatId', $chatId)->delete();
+
+        return response()->json(['Success' => 'true', 'message' => 'Group chat successfully deleted']);
     }
 
     public function createchat(Request $request)
@@ -168,6 +273,7 @@ class ChatController extends Controller
 
     }
 
+    
     public function getGroupChat($user_id){
         // $request->validate([
         //     'email' => 'required|email',

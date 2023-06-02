@@ -297,6 +297,16 @@ Route::middleware(['auth:sanctum', 'ability:superiorAdmin'])->group(function () 
     // Delete user from group chat
     Route::delete('group-chats/{chatId}/members/{userId}', [ChatController::class, 'deleteuser']);
 
+    // Delete a group chat 
+    Route::delete('deletechats/{chatId}', [ChatController::class, 'deletechat']);
+
+    // Adding new user to an existing group chat
+    Route::post('addnewusertochat/{chatId}/members/{userId}', [ChatController::class, 'addnewusertochat']);
+
+    // Add existing user to an existing team chat to another 
+    // Route::post('addusertoexistchat/{teamId}/members/{userId}', [ChatController::class, 'addtoexistchat']);
+
+
     Route::prefix('chat')->group(function () {
         // Adding user to existing group chat
         Route::put('{chatId}/addUser/{userId}', [ChatController::class, 'adduser']);
