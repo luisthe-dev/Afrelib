@@ -75,6 +75,33 @@ class ChatController extends Controller
                 $chat->save();
 
         }
+
+        // Adding all admins to chat 
+        $admin = admin::all();
+        for($a=0; $a <= $no_of_participant; $a++){
+
+            $chats= new chat;
+
+            $chats->chatId = $request->team_id;
+
+             $chats->chatName = $name_of_team;
+
+             $chats->chatDescription = "Welcome to the Group Chat";
+
+             $chats->chatType = "Team";
+
+             $chats->userId = $admin[$a]->id;
+
+             $chats->firstName = $admin[$a]->first_name;
+             $chats->lastName = $admin[$a]->last_name;
+             $chats->email = $admin[$a]->email;
+
+             $chats->save();
+
+        }
+
+        
+
         return response()->json(['status' => 'Success', 'message' => 'Group chat created and team members added successfully.']);
 
     }
