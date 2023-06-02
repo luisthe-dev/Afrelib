@@ -78,6 +78,8 @@ class ChatController extends Controller
 
         // Adding all admins to chat 
         $admin = admin::all();
+       if($admin->count() > 0)
+       {
         for($a=0; $a <= $no_of_participant; $a++){
 
             $chats= new chat;
@@ -99,6 +101,7 @@ class ChatController extends Controller
              $chats->save();
 
         }
+       }
 
         
 
