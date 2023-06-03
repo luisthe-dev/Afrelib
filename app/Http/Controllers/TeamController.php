@@ -214,6 +214,52 @@ class TeamController extends Controller
         return SuccessResponse('Team Has Been Added To Cohort Successfully');
     }
 
+    public function transferStudent(Request $request)
+    {
+
+        $request->validate([
+            'student_id' => 'required|numeric',
+            'team_id' => 'required|numeric'
+        ]);
+
+        $studentId = DB::table('roles')->where(['role_name' => 'Student'])->first()->role_id;
+
+        $student = User::where(['id' => $request->student_id, 'role_id' => $studentId])->first();
+
+        if (!$student) return ErrorResponse('Invalid Student Id');
+
+        $team = Team::where(['id' => $request->team_id, 'is_deleted' => false])->first();
+
+        if (!$team) return ErrorResponse('Invalid Team Id');
+
+        $teams = Team::where([['team_members', 'like', '%' . $student->id . '%']])->get();
+
+        foreach ($teams as $single) {
+            $singleMembers = json_decode($single->team_members, true);
+
+            if (!in_array($student->id, $singleMembers)) continue;
+
+            if ($single->id === $team->id) return ErrorResponse('Student Already Belongs To Team');
+
+            $studentKey = array_search($student->id, $singleMembers);
+
+            array_splice($singleMembers, $studentKey, 1);
+            $single->team_members = json_encode($singleMembers);
+
+            $single->save();
+
+            break;
+        }
+
+        $teamMembers = json_decode($team->team_members, true);
+        array_push($teamMembers, $student->id);
+        $team->team_members = json_encode($teamMembers);
+
+        $team->save();
+
+        return SuccessResponse('Student Transferred Successfully');
+    }
+
     public function deleteTeam($teamId)
     {
         $team = Team::where(['id' => $teamId, 'is_deleted' => false])->first();

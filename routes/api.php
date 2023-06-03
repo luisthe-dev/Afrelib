@@ -90,6 +90,7 @@ Route::middleware(['auth:sanctum', 'ability:superiorAdmin'])->group(function () 
     Route::put('cohort/{cohortId}/{team_id}', [TeamController::class, 'addTeamToCohort']);
 
     Route::post('team/create', [TeamController::class, 'createTeam']);
+    Route::put('team/transfer', [TeamController::class, 'transferStudent']);
     Route::put('team/{teamId}/mentor', [TeamController::class, 'updateMentor']);
     Route::delete('team/{teamId}', [TeamController::class, 'deleteTeam']);
 
@@ -302,13 +303,13 @@ Route::middleware(['auth:sanctum', 'ability:superiorAdmin'])->group(function () 
     // Delete user from group chat
     Route::delete('group-chats/{chatId}/members/{userId}', [ChatController::class, 'deleteuser']);
 
-    // Delete a group chat 
+    // Delete a group chat
     Route::delete('deletechats/{chatId}', [ChatController::class, 'deletechat']);
 
     // Adding new user to an existing group chat
     Route::post('addnewusertochat/{chatId}/members/{userId}', [ChatController::class, 'addnewusertochat']);
 
-    // Add existing user to an existing team chat to another 
+    // Add existing user to an existing team chat to another
     // Route::post('addusertoexistchat/{teamId}/members/{userId}', [ChatController::class, 'addtoexistchat']);
 
 
@@ -350,5 +351,4 @@ Route::prefix('dashboard')->group(function () {
 
     // Retrieve mentor dashbboard data
     Route::middleware(['auth:sanctum', 'ability:Mentor'])->get('mentor', [DashboardController::class, 'mentordashboard']);
-
 });
