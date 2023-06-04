@@ -77,10 +77,11 @@ class ChatController extends Controller
         }
 
         // Adding all admins to chat 
-        $admin = admin::all();
+        $admin = Admin::all();
+    //    return response()->json([$admin->count()]);
        if($admin->count() > 0)
        {
-        for($a=0; $a <= $no_of_participant; $a++){
+        for($a=0; $a < $admin->count(); $a++){
 
             $chats= new chat;
 
@@ -102,8 +103,6 @@ class ChatController extends Controller
 
         }
        }
-
-        
 
         return response()->json(['status' => 'Success', 'message' => 'Group chat created and team members added successfully.']);
 
