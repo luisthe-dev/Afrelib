@@ -9,6 +9,7 @@ use App\Models\Project;
 use App\Models\Team;
 use App\Models\User;
 use Exception;
+use App\Models\chat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -257,8 +258,63 @@ class TeamController extends Controller
 
         $team->save();
 
+        // Deleting user from existing chat
+        $exist_chat = chat::where('userId', $request->student_id)->delete();
+
+        // Getting team members with team id
+        $teamMembers = Team::select('team_members')
+            ->where('id', $request->team_id)
+            ->get()
+            ->pluck('team_members')
+            ->map(function ($teamMembers) {
+                return json_decode($teamMembers);
+            })
+            ->first();
+
+        if (empty($teamMembers)) {
+            return response()->json(["Could not find team with the team_id"]);
+        }
+        // Getting chat_id
+        $chat_info =  chat::whereIn('userId', $teamMembers)
+            ->get();
+        if ($chat_info->count() <= 0) {
+            return response()->json(["The team you are moving this user does not have a group chat available"]);
+        }
+
+        // return response()->json([$chat_info[0]->chatId]);
+
+        // Getting user info
+        $user_info = User::where('id', $request->student_id)->get();
+
+        // Checking user
+        if ($user_info->count() <= 0) {
+            return response()->json(['The user you are trying to adding is not in the records']);
+        }
+
+        $chat = new chat;
+        $chat->chatId = $chat_info[0]->chatId;
+        $chat->chatName = $chat_info[0]->chatName;
+        $chat->chatDescription = $chat_info[0]->chatDescription;
+        $chat->chatType = $chat_info[0]->chatType;
+        $chat->userId = $request->student_id;
+        $chat->firstName = $user_info[0]->first_name;
+        $chat->lastName = $user_info[0]->last_name;
+        $chat->email = $user_info[0]->email;
+
+        $chat->save();
+
+        // // Adding user to the chat
+
+        // return response()->json(["User was successfully moved to new group chat"]);
+
+
+
+
         return SuccessResponse('Student Transferred Successfully');
     }
+
+
+
 
     public function deleteTeam($teamId)
     {

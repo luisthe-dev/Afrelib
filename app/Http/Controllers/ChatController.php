@@ -303,6 +303,14 @@ class ChatController extends Controller
 
     }
 
+    // Delete all chats 
+    public function deleteallChat()
+    {
+        DB::table('chats')->truncate();
+
+        return response()->json("All chats deleted");
+    }
+
     
     public function getGroupChat($user_id){
         // $request->validate([
