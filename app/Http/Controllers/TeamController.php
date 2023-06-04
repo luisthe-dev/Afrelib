@@ -164,6 +164,111 @@ class TeamController extends Controller
         return SuccessResponse('Team Mentor Updated Successfully', $team);
     }
 
+    public function transferStudent(Request $request)
+    {
+
+        $request->validate([
+            'student_id' => 'required|numeric',
+            'team_id' => 'required|numeric'
+        ]);
+
+        $studentId = DB::table('roles')->where(['role_name' => 'Student'])->first()->role_id;
+
+        $student = User::where(['id' => $request->student_id, 'role_id' => $studentId])->first();
+
+        if (!$student) return ErrorResponse('Invalid Student Id');
+
+        $team = Team::where(['id' => $request->team_id, 'is_deleted' => false])->first();
+
+        if (!$team) return ErrorResponse('Invalid Team Id');
+
+        $teams = Team::where([['team_members', 'like', '%' . $student->id . '%']])->get();
+
+        foreach ($teams as $single) {
+            $singleMembers = json_decode($single->team_members, true);
+
+            if (!in_array($student->id, $singleMembers)) continue;
+
+            if ($single->id === $team->id) return ErrorResponse('Student Already Belongs To Team');
+
+            $studentKey = array_search($student->id, $singleMembers);
+
+            array_splice($singleMembers, $studentKey, 1);
+            $single->team_members = json_encode($singleMembers);
+
+            $single->save();
+
+            break;
+        }
+
+        $teamMembers = json_decode($team->team_members, true);
+        array_push($teamMembers, $student->id);
+        $team->team_members = json_encode($teamMembers);
+
+        $team->save();
+
+
+
+        // Deleting user from existing chat 
+        $exist_chat = chat::where('userId', $request->student_id)->delete();
+
+        // Getting team members with team id 
+        $teamMembers = Team::select('team_members')
+        ->where('id', $request->team_id)
+        ->get()
+        ->pluck('team_members')
+        ->map(function ($teamMembers) {
+            return json_decode($teamMembers);
+        })
+        ->first();
+
+        if(empty($teamMembers))
+        {
+            return response()->json(["Could not find team with the team_id"]);
+        }
+        // Getting chat_id 
+        $chat_info =  chat::whereIn('userId', $teamMembers)
+        ->get();
+        if($chat_info->count() <= 0)
+        {
+            return response()->json(["The team you are moving this user does not have a group chat available"]);
+        }
+       
+        // return response()->json([$chat_info[0]->chatId]);
+
+        // Getting user info 
+        $user_info = User::where('id',$request->student_id)->get();
+        
+            // Checking user 
+            if($user_info->count() <= 0){
+                return response()->json(['The user you are trying to adding is not in the records']);
+            }
+        
+            $chat = new chat;
+            $chat->chatId = $chat_info[0]->chatId;
+            $chat->chatName = $chat_info[0]->chatName;
+            $chat->chatDescription = $chat_info[0]->chatDescription;
+            $chat->chatType = $chat_info[0]->chatType;
+            $chat->userId = $request->student_id;
+            $chat->firstName = $user_info[0]->first_name;
+            $chat->lastName = $user_info[0]->last_name;
+            $chat->email = $user_info[0]->email;
+
+            $chat->save();
+
+        // // Adding user to the chat 
+
+        // return response()->json(["User was successfully moved to new group chat"]);
+
+
+
+
+        return SuccessResponse('Student Transferred Successfully');
+    }
+
+
+
+
     public function deleteTeam($teamId)
     {
         $team = Team::where(['id' => $teamId, 'is_deleted' => false])->first();
