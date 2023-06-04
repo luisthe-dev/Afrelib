@@ -70,6 +70,9 @@ Route::middleware(['auth:sanctum', 'ability:superiorAdmin'])->group(function () 
 
     Route::get('students/unmatched', [UserController::class, 'sudentsNotInTeams']);
 
+    Route::put('team/transfer', [TeamController::class, 'transferStudent']);
+
+
     Route::get('cohorts', [CohortController::class, 'getAllCohorts']);
     Route::post('cohort', [CohortController::class, 'createCohort']);
     Route::get('cohort/{cohortId}', [CohortController::class, 'getSingleCohort']);
@@ -302,6 +305,9 @@ Route::middleware(['auth:sanctum', 'ability:superiorAdmin'])->group(function () 
 
     // Adding new user to an existing group chat
     Route::post('addnewusertochat/{chatId}/members/{userId}', [ChatController::class, 'addnewusertochat']);
+
+    // Deleteing all chats 
+    Route::delete('deleteallchat', [ChatController::class, 'deleteallChat']);
 
     // Add existing user to an existing team chat to another 
     // Route::post('addusertoexistchat/{teamId}/members/{userId}', [ChatController::class, 'addtoexistchat']);

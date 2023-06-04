@@ -6,6 +6,7 @@ use App\Http\Requests\CreateTeamRequest;
 use App\Models\Cohort;
 use App\Models\Team;
 use App\Models\User;
+use App\Models\chat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
