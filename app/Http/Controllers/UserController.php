@@ -10,6 +10,7 @@ use App\Models\Team;
 use App\Models\User;
 use App\Models\groupChat;
 use App\Models\chat;
+use App\Models\Admin;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -242,15 +243,6 @@ class UserController extends Controller
 
             // Adding new mentor to the group chat
 
-            $gchat = new groupChat;
-            $gchat->team_id = $group_id;
-            $gchat->team_name = "Mentor" . $group_id;
-            $gchat->participant = $request->first_name;
-            $gchat->userId = $email[0]->id;
-            $gchat->role = "Mentor";
-            $gchat->save();
-
-
             $chat = new chat;
             $chat->chatId = 8888;
             $chat->chatName = "Admin and Mentor";
@@ -263,10 +255,58 @@ class UserController extends Controller
             $chat->email = $request->email;
 
             $chat->save();
+
+            $mentor_details = User::where("role_id", $role->role_id)->get();
+            if ($mentor_details->count() > 0) {
+                for ($m = 0; $m < $mentor_details->count(); $m++) {
+
+                    $checkuser = chat::where("userId", $mentor_details[$m]->id)->where("chatName", "Admin and Mentor")->get();
+
+                    if ($checkuser->count() <= 0) {
+                        $chat = new chat;
+                        $chat->chatId = 8888;
+                        $chat->chatName = "Admin and Mentor";
+                        $chat->chatDescription = "Welcome to Admin and Mentor Group Chat";
+
+                        $chat->chatType = "AdminMentor";
+                        $chat->userId = $mentor_details[$m]->id;
+                        $chat->firstName = $mentor_details[$m]->first_name;
+                        $chat->lastName = $mentor_details[$m]->last_name;
+                        $chat->email = $mentor_details[$m]->email;
+
+                        $chat->save();
+                    }
+                }
+            }
+
+            $admin_details = Admin::all();
+
+            if ($admin_details->count() > 0) {
+                for ($t = 0; $t < $admin_details->count(); $t++) {
+
+                    $checkuser = chat::where("userId", $admin_details[$t]->id)->where("chatName", "Admin and Mentor")->where("email", $admin_details[$t]->email)->get();
+
+                    if ($checkuser->count() <= 0) {
+                        $chat = new chat;
+                        $chat->chatId = 8888;
+                        $chat->chatName = "Admin and Mentor";
+                        $chat->chatDescription = "Welcome to Admin and Mentor Group Chat";
+
+                        $chat->chatType = "AdminMentor";
+                        $chat->userId = $admin_details[$t]->id;
+                        $chat->firstName = $admin_details[$t]->first_name;
+                        $chat->lastName = $admin_details[$t]->last_name;
+                        $chat->email = $admin_details[$t]->email;
+
+                        $chat->save();
+                    }
+                }
+            }
         }
 
         // Adding panelist to group chat
         if ($role->role_name == 'Panelist') {
+
             $panel_id = base64_encode("Panelist");
             // Adding new panelist to the group chat
 
@@ -289,9 +329,30 @@ class UserController extends Controller
             $chat->lastName = $request->last_name;
             $chat->email = $request->email;
 
-            $chat->save();
 
-            $chat->save();
+            $panelist_details = User::where("role_id", $role->role_id)->get();
+
+            if ($panelist_details->count() > 0) {
+                for ($p = 0; $p < $panelist_details->count(); $p++) {
+
+                    $checkuser = chat::where("userId", $panelist_details[$p]->id)->where("chatName", "Panelist")->get();
+
+                    if ($checkuser->count() <= 0) {
+                        $chat = new chat;
+                        $chat->chatId = 9999;
+                        $chat->chatName = "Panelist";
+                        $chat->chatDescription = "Welcome to Panelist Group Chat";
+
+                        $chat->chatType = "Panelist";
+                        $chat->userId = $panelist_details[$p]->id;
+                        $chat->firstName = $panelist_details[$p]->first_name;
+                        $chat->lastName = $panelist_details[$p]->last_name;
+                        $chat->email = $panelist_details[$p]->email;
+
+                        $chat->save();
+                    }
+                }
+            }
         }
 
         try {

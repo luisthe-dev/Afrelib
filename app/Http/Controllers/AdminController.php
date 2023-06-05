@@ -6,6 +6,8 @@ use App\Http\Requests\CreateAdminRequest;
 use App\Models\Admin;
 use App\Models\groupChat;
 use App\Models\chat;
+use App\Models\User;
+use App\Models\Role;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -38,6 +40,63 @@ class AdminController extends Controller
         $group_id = base64_encode("admin" . "mentor");
 
         // Adding new admin to the group chat
+
+        $chat = new chat;
+        $chat->chatType = "AdminMentor";
+        $chat->userId = $email[0]->id;
+        $chat->firstName = $request->first_name;
+        $chat->lastName = $request->last_name;
+        $chat->email = $request->email;
+
+        $chat->save();
+
+        $role = Role::where("role_name", "Mentor")->get();
+        $mentor_details = User::where("role_id", $role[0]->role_id)->get();
+
+        if ($mentor_details->count() > 0) {
+            for ($m = 0; $m < $mentor_details->count(); $m++) {
+
+                $checkuser = chat::where("userId", $mentor_details[$m]->id)->where("chatName", "Admin and Mentor")->get();
+
+                if ($checkuser->count() <= 0) {
+                    $chat = new chat;
+                    $chat->chatId = 8888;
+                    $chat->chatName = "Admin and Mentor";
+                    $chat->chatDescription = "Welcome to Admin and Mentor Group Chat";
+
+                    $chat->chatType = "AdminMentor";
+                    $chat->userId = $mentor_details[$m]->id;
+                    $chat->firstName = $mentor_details[$m]->first_name;
+                    $chat->lastName = $mentor_details[$m]->last_name;
+                    $chat->email = $mentor_details[$m]->email;
+
+                    $chat->save();
+                }
+            }
+        }
+
+        $admin_details = Admin::all();
+
+        for ($t = 0; $t < $admin_details->count(); $t++) {
+
+            $checkuser = chat::where("userId", $admin_details[$t]->id)->where("chatName", "Admin and Mentor")->where("email", $admin_details[$t]->email)->get();
+
+            if ($checkuser->count() <= 0) {
+                $chat = new chat;
+                $chat->chatId = 8888;
+                $chat->chatName = "Admin and Mentor";
+                $chat->chatDescription = "Welcome to Admin and Mentor Group Chat";
+
+                $chat->chatType = "AdminMentor";
+                $chat->userId = $admin_details[$t]->id;
+                $chat->firstName = $admin_details[$t]->first_name;
+                $chat->lastName = $admin_details[$t]->last_name;
+                $chat->email = $admin_details[$t]->email;
+
+                $chat->save();
+            }
+        }
+
 
 
         // Adding new admin to the group chat
