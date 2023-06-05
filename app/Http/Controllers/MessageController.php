@@ -117,7 +117,7 @@ class MessageController extends Controller
             $unreadMessage->save();
         }
         
-        event(new SendChatMessage( $chat_id));
+        // event(new SendChatMessage( $chat_id));
         
         return response()->json([
             "messageId" => $rand,

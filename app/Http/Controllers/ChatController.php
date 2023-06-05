@@ -336,22 +336,29 @@ class ChatController extends Controller
         }
 
         $combinedResults = [];
-
         foreach ($groupuser as $group) {
             $chat_id = $group->chatId;
         
             $lastMessage = ChatMessages::where('chatId', $chat_id)
-                ->orderByDesc('created_at')->first(['senderName', 'content', 'mediaType', 'timestamp']);
-
-            $unread = ChatMessages::where('chatId', $chat_id)
-                ->orderByDesc('created_at')->where("status", "UnRead");
+                ->orderByRaw('CASE WHEN created_at IS NULL THEN 1 ELSE 0 END, created_at DESC')
+                ->first(['senderName', 'content', 'mediaType', 'created_at']);
         
-            if ($lastMessage) {
-                $combinedResults[] = array_merge($group->toArray(),['Unread Messages' => $unread->count()], ['lastMessage' => $lastMessage]);
-            } else {
-                $combinedResults[] = $group->toArray();
-            }
+            $unread = ChatMessages::where('chatId', $chat_id)
+                ->orderByDesc('created_at')
+                ->where("status", "UnRead");
+        
+            $combinedResults[] = array_merge($group->toArray(), ['Unread Messages' => $unread->count()], ['lastMessage' => $lastMessage]);
         }
+        
+        usort($combinedResults, function ($a, $b) {
+            if ($a['lastMessage'] === null) {
+                return 1;
+            } elseif ($b['lastMessage'] === null) {
+                return -1;
+            } else {
+                return strtotime($b['lastMessage']['created_at']) - strtotime($a['lastMessage']['created_at']);
+            }
+        });
         
         
         // Return the chats as JSON
@@ -586,6 +593,8 @@ class ChatController extends Controller
      public function createCohortChat($cohort_id){
        
         $validateCohort= Cohort::where('cohort_id', $cohort_id)->get();
+
+        $chatname = $validateCohort[0]->cohort_name;
     
         // Checking if cohort id exist in database 
         if($validateCohort->count() <= 0)
@@ -736,17 +745,23 @@ class ChatController extends Controller
             }
     
             $admin= admin::all();
-            $chat= new Chat;
-            $chat->chatId =  $chatId;
-            $chat->chatName = $validateCohort[0]->cohort_name;
-            $chat->chatDescription = 'Welcome to a new group chat';
-            $chat->chatType = 'Cohort Group';
-            $chat->userId = $admin[0]->id;
-            $chat->firstName = $admin[0]->first_name;
-            $chat->lastName = $admin[0]->last_name;
-            $chat->email = $admin[0]->email;
-            $chat->save();
-    
+            for($t = 0; $t < $admin->count(); $t++)
+            {
+                $validateC= Cohort::where('cohort_id', $cohort_id)->get();
+
+                // $chatname = ;
+
+               $chat= new Chat;
+               $chat->chatId =  $chatId;
+               $chat->chatName = $validateC[0]->cohort_name;
+               $chat->chatDescription = 'Welcome to a new group chat';
+               $chat->chatType = 'Cohort Group';
+               $chat->userId = $admin[$t]->id;
+               $chat->firstName = $admin[$t]->first_name;
+               $chat->lastName = $admin[$t]->last_name;
+               $chat->email = $admin[$t]->email;
+               $chat->save();
+            }
            }
     
         //    Getting details of last entered result 
@@ -872,18 +887,23 @@ class ChatController extends Controller
     
           }
     
-          $admin= admin::all();
-          $chat= new Chat;
-          $chat->chatId =  $chatId;
-          $chat->chatName = 'Cohort' . $cohort_id;
-          $chat->chatDescription = 'Welcome to a new group chat';
-          $chat->chatType = 'Cohort Group';
-          $chat->userId = $admin[0]->id;
-          $chat->firstName = $admin[0]->first_name;
-          $chat->lastName = $admin[0]->last_name;
-          $chat->email = $admin[0]->email;
-          $chat->save();
-    
+         }
+
+        //  Adding admin 
+
+        $admin= admin::all();
+         for($t = 0; $t < $admin->count(); $t++)
+         {
+            $chat= new Chat;
+            $chat->chatId =  $chatId;
+            $chat->chatName = 'Cohort' . $cohort_id;
+            $chat->chatDescription = 'Welcome to a new group chat';
+            $chat->chatType = 'Cohort Group';
+            $chat->userId = $admin[$t]->id;
+            $chat->firstName = $admin[$t]->first_name;
+            $chat->lastName = $admin[$t]->last_name;
+            $chat->email = $admin[$t]->email;
+            $chat->save();
          }
     
       //    Getting details of last entered result 
